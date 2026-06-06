@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
-import DbActions from "./routes/DbActions.js";
+import GeneralRoutes from "./routes/generalRoutes.js";
+import EmployeeRoutes from "./routes/employeeRoutes.js";
 import "dotenv/config";
 
 // Configuring Express app
@@ -14,7 +15,8 @@ app.get("/", (req, res) => {
     res.send("HRMS backend is running!", 200);
 });
 
-app.use("/api", DbActions);
+app.use("/api", GeneralRoutes);
+app.use("/api/employee", EmployeeRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
