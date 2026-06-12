@@ -1,16 +1,39 @@
-# React + Vite
+# HRMS
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+An application to manage employees, departments and courses done by the employee
 
-Currently, two official plugins are available:
+## API Endpoints
+### Employee Routes
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+| Method | Endpoint             | Description                       |
+| ------ | -------------------- | --------------------------------- |
+| GET    | `/api/employees`     | Fetch paginated list of employees |
+| GET    | `/api/employees/:id` | Fetch employee details by ID      |
+| POST   | `/api/employees`     | Create a new employee             |
+| PUT    | `/api/employees/:id` | Update employee details           |
+| DELETE | `/api/employees/:id` | Delete an employee                |
 
-## React Compiler
+### Department Routes
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+| Method | Endpoint              | Description                         |
+| ------ | --------------------- | ----------------------------------- |
+| GET    | `/api/department`     | Fetch paginated list of departments |
+| GET    | `/api/department/:id` | Fetch department details by ID      |
+| POST   | `/api/department`     | Create a new department             |
+| PUT    | `/api/department/:id` | Update department details           |
+| DELETE | `/api/department/:id` | Delete a department                 |
 
-## Expanding the ESLint configuration
+### Course Routes
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+| Method | Endpoint          | Description                     |
+| ------ | ----------------- | ------------------------------- |
+| GET    | `/api/course`     | Fetch paginated list of courses |
+| GET    | `/api/course/:id` | Fetch course details by ID      |
+| POST   | `/api/course`     | Create a new course             |
+| PUT    | `/api/course/:id` | Update course details           |
+| DELETE | `/api/course/:id` | Delete a course                 |
+
+## Authors
+[![Arya Panwar](https://img.shields.io/badge/Arya4930-000?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Arya4930)
+[![Manvendra Singh Bisht](https://img.shields.io/badge/DumbTempest-000?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Manvendra775)
+[![Aryaman Saraswat](https://img.shields.io/badge/DumbTempest-000?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Aryaman-Saraswat2004)
