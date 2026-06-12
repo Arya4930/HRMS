@@ -35,5 +35,5 @@ An application to manage employees, departments and courses done by the employee
 
 ## Authors
 [![Arya Panwar](https://img.shields.io/badge/Arya4930-000?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Arya4930)
-[![Manvendra Singh Bisht](https://img.shields.io/badge/DumbTempest-000?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Manvendra775)
-[![Aryaman Saraswat](https://img.shields.io/badge/DumbTempest-000?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Aryaman-Saraswat2004)
+[![Manvendra Singh Bisht](https://img.shields.io/badge/Manvendra775-000?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Manvendra775)
+[![Aryaman Saraswat](https://img.shields.io/badge/AryamanSaraswat2004-000?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Aryaman-Saraswat2004)
