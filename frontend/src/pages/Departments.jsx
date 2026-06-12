@@ -1,126 +1,80 @@
 import { useState } from "react";
+import Navbar from "../components/Navbar";
+import Sidebar from "../components/Sidebar";
 
 export default function Departments() {
-  const [departments, setDepartments] = useState([]);
-
-  const [form, setForm] = useState({
-    department_id: "",
-    department_name: "",
-    department_head: "",
-    department_email: "",
-    location: "",
-    budget: "",
-  });
-
-  const handleChange = (e) => {
-    setForm({
-      ...form,
-      [e.target.name]: e.target.value,
-    });
-  };
+  const [departments, setDepartments] = useState(
+    JSON.parse(localStorage.getItem("departments")) || []
+  );
+  const [departmentName, setDepartmentName] = useState("");
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    setDepartments([...departments, form]);
+    if (!departmentName.trim()) return;
 
-    setForm({
-      department_id: "",
-      department_name: "",
-      department_head: "",
-      department_email: "",
-      location: "",
-      budget: "",
-    });
+    const updatedDepartments = [...departments, departmentName];
+    setDepartments(updatedDepartments);
+    localStorage.setItem("departments", JSON.stringify(updatedDepartments));
+    setDepartmentName("");
   };
 
   return (
-    <div className="bg-white p-6 rounded-xl shadow">
-      <h1 className="text-2xl font-bold mb-5 !text-black">
-        Departments
-      </h1>
+    <div className="min-h-screen bg-gray-100 text-black">
+      <Navbar />
 
-      <form
-        onSubmit={handleSubmit}
-        className="grid grid-cols-2 gap-4"
-      >
-        <input
-          name="department_id"
-          value={form.department_id}
-          onChange={handleChange}
-          placeholder="Department ID"
-          className="border p-2 rounded"
-        />
+      <div className="flex">
+        <Sidebar />
 
-        <input
-          name="department_name"
-          value={form.department_name}
-          onChange={handleChange}
-          placeholder="Department Name"
-          className="border p-2 rounded"
-        />
+        <main className="flex-1 p-6">
+          <div className="bg-white border rounded p-4">
+            <div className="flex items-center gap-4 mb-4">
+              <h1 className="text-2xl font-bold !text-black">Departments</h1>
+              <div className="flex-1 h-px bg-gray-300" />
+            </div>
 
-        <input
-          name="department_head"
-          value={form.department_head}
-          onChange={handleChange}
-          placeholder="Department Head"
-          className="border p-2 rounded"
-        />
+            <p className="text-gray-600 mb-6">
+              Add department names below
+              <br/>
+              <br/>
+            </p>
 
-        <input
-          name="department_email"
-          value={form.department_email}
-          onChange={handleChange}
-          placeholder="Department Email"
-          className="border p-2 rounded"
-        />
+            <form onSubmit={handleSubmit} className="flex flex-col md:flex-row gap-3">
+              <input
+                type="text"
+                value={departmentName}
+                onChange={(e) => setDepartmentName(e.target.value)}
+                placeholder="Enter Department Name"
+                className="flex-1 border rounded px-3 py-2 bg-white"
+              />
+              <button
+                type="submit"
+                className="border px-4 py-2 rounded bg-gray-100 hover:bg-gray-200"
+              >
+                Add
+              </button>
+            </form>
 
-        <input
-          name="location"
-          value={form.location}
-          onChange={handleChange}
-          placeholder="Location"
-          className="border p-2 rounded"
-        />
+            <div className="mt-8">
+              <h2 className="text-lg font-semibold mb-3 !text-black">
+                Saved Departments
+              </h2>
 
-        <input
-          name="budget"
-          value={form.budget}
-          onChange={handleChange}
-          placeholder="Budget"
-          className="border p-2 rounded"
-        />
-
-        <button
-          type="submit"
-          className="bg-green-600 text-white rounded p-2"
-        >
-          Save Department
-        </button>
-      </form>
-
-      <table className="w-full border mt-6">
-        <thead>
-          <tr>
-            <th className="border p-2">ID</th>
-            <th className="border p-2">Name</th>
-            <th className="border p-2">Head</th>
-            <th className="border p-2">Location</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          {departments.map((dept, index) => (
-            <tr key={index}>
-              <td className="border p-2">{dept.department_id}</td>
-              <td className="border p-2">{dept.department_name}</td>
-              <td className="border p-2">{dept.department_head}</td>
-              <td className="border p-2">{dept.location}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+              {departments.length === 0 ? (
+                <p className="text-gray-600">No departments added yet.</p>
+              ) : (
+                <ul className="space-y-2">
+                  {departments.map((dept, index) => (
+                    <li key={index} className="border rounded p-3 bg-gray-50">
+                      {dept}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </div>
+        </main>
+      </div>
     </div>
   );
 }

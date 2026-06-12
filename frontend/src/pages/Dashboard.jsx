@@ -1,57 +1,70 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
-
+import Sidebar from "../components/Sidebar";
 
 export default function Dashboard() {
+  const navigate = useNavigate();
+
+  const recentSearches =
+    JSON.parse(localStorage.getItem("recentSearches")) || [];
+
+  const openEmployee = (employee) => {
+    localStorage.setItem("selectedEmployee", JSON.stringify(employee));
+    navigate("/employee-profile");
+  };
+
   return (
-    <div>
-      <Navbar title="Dashboard" />
-       <div className="bg-white rounded-2xl shadow p-6">
-         <h2 className="text-2xl font-semibold !text-black">
-            Welcome to HRMS
-         </h2>
+    <div className="min-h-screen bg-gray-100 text-black">
+      <Navbar />
 
-         <p className="text-gray-600 mt-2">
-              Manage Employees, Departments, Courses and Enrollments using the menu on the left.
-         </p>
-</div>
+      <div className="flex">
+        <Sidebar />
 
-      <div className="mt-8 bg-white rounded-2xl shadow p-6">
-        <h2 className="text-xl font-semibold mb-4 !text-black">
-          Quick Actions
-        </h2>
+        <main className="flex-1 p-6">
+          <div className="bg-white border rounded p-4 mb-6">
+            <h1 className="text-2xl font-bold mb-2 !text-black">Dashboard</h1>
+          </div>
+          <div className="bg-white border rounded p-4">
+            <h2 className="text-xl font-semibold mb-4 !text-black">
+              Recent Searches
+            </h2>
 
-        <div className="grid md:grid-cols-2 gap-4">
+            {recentSearches.length === 0 ? (
+              <p className="!text-black">No recent searches yet.</p>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full border">
+                  <thead className="bg-gray-100">
+                    <tr>
+                      <th className="border p-2 text-left">Employee ID</th>
+                      <th className="border p-2 text-left">Name</th>
+                      <th className="border p-2 text-left">Department</th>
+                      <th className="border p-2 text-left">Action</th>
+                    </tr>
+                  </thead>
 
-          <Link
-            to="/employees"
-            className="p-4 bg-blue-100 rounded-xl hover:bg-blue-200"
-          >
-            👨‍💼 Add Employee
-          </Link>
-
-          <Link
-            to="/departments"
-            className="p-4 bg-green-100 rounded-xl hover:bg-green-200"
-          >
-            🏢 Add Department
-          </Link>
-
-          <Link
-            to="/courses"
-            className="p-4 bg-purple-100 rounded-xl hover:bg-purple-200"
-          >
-            🎓 Add Course
-          </Link>
-
-          <Link
-            to="/employee-courses"
-            className="p-4 bg-orange-100 rounded-xl hover:bg-orange-200"
-          >
-            📅 Enroll Employee
-          </Link>
-
-        </div>
+                  <tbody>
+                    {recentSearches.map((employee, index) => (
+                      <tr key={index}>
+                        <td className="border p-2">{employee.employeeId}</td>
+                        <td className="border p-2">{employee.name}</td>
+                        <td className="border p-2">{employee.department}</td>
+                        <td className="border p-2">
+                          <button
+                            onClick={() => openEmployee(employee)}
+                            className="border px-3 py-1 rounded bg-gray-100 hover:bg-gray-200"
+                          >
+                            View Profile
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        </main>
       </div>
     </div>
   );
