@@ -40,6 +40,10 @@ router.put("/:id", (req, res) => {
 
     console.log("Received course update data:", req.body); // Debugging log
 
+    if(!name || !code || !location || !duration || !details || !instructor || !cost) {
+        return res.status(400).json({ message: "All fields are required." });
+    }
+
     // Logic to update course details in the database will go here
 
     res.status(200).json({ message: "Course updated successfully!" });

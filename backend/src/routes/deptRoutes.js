@@ -38,6 +38,11 @@ router.post("/", (req, res) => {
     if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(dept_email)) {
         return res.status(400).json({ message: "Invalid email format." });
     }
+
+    const eod = new Date(established_date);
+    if(Number.isNaN(eod.getTime()) || eod > new Date()) {
+        return res.status(400).json({ message: "Invalid Established Date format." });
+    }
     
     // Logic to add department to the database will go here
 
@@ -49,6 +54,25 @@ router.put("/:id", (req, res) => {
     const { dept_name, established_date, dept_email, location, budget } = req.body;
 
     console.log("Received department update data:", req.body); // Debugging log
+
+    if(!dept_name || !established_date || !dept_email || !location || !budget) {
+        return res.status(400).json({ message: "All fields are required." });
+    }
+
+    // Regex for the department name to make sure it doesnt contain any numbers
+    if(/\d/.test(dept_name)) {
+        return res.status(400).json({ message: "Department name should not contain numbers." });
+    }
+
+    // Regex for validating email format
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(dept_email)) {
+        return res.status(400).json({ message: "Invalid email format." });
+    }
+
+    const eod = new Date(established_date);
+    if(Number.isNaN(eod.getTime()) || eod > new Date()) {
+        return res.status(400).json({ message: "Invalid Established Date format." });
+    }
 
     // Logic to update department details in the database will go here
 
