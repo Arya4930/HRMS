@@ -1,7 +1,10 @@
 import { useState } from "react";
+import { Loader } from 'lucide-react';
 
 export default function Courses() {
   const [courses, setCourses] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
 
   const [form, setForm] = useState({
     course_id: "",
@@ -19,19 +22,46 @@ export default function Courses() {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    setCourses([...courses, form]);
+    if(!form.course_name || !form.course_id || !form.source || !form.duration_days || !form.course_type || !form.created_by) {
+        setMessage("All fields are required.");
+        return;
+    }
 
-    setForm({
-      course_id: "",
-      course_name: "",
-      source: "",
-      duration_days: "",
-      course_type: "",
-      created_by: "",
-    });
+    try {
+      setLoading(true);
+      const res = await fetch("http://localhost:3000/api/course", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(form),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        console.error("Error adding course:", errorData.message);
+      }
+      console.log(res);
+
+      setMessage("Course added successfully!");
+      setCourses([...courses, form]);
+
+      setForm({
+        course_id: "",
+        course_name: "",
+        source: "",
+        duration_days: "",
+        course_type: "",
+        created_by: "",
+      });
+    } catch (error) {
+      console.error("Error adding course:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -94,10 +124,13 @@ export default function Courses() {
 
         <button
           type="submit"
+          disabled={loading}
           className="bg-purple-600 text-white rounded p-2"
         >
           Save Course
         </button>
+        {loading && <Loader className="animate-spin" />}
+        <p>{message}</p>
       </form>
 
       <table className="w-full border mt-6">
