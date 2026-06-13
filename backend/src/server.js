@@ -2,6 +2,8 @@ import express from "express";
 import cors from "cors";
 import GeneralRoutes from "./routes/generalRoutes.js";
 import EmployeeRoutes from "./routes/employeeRoutes.js";
+import CourseRoutes from "./routes/courseRoutes.js";
+import DeptRoutes from "./routes/deptRoutes.js";
 import "dotenv/config";
 
 // Configuring Express app
@@ -17,6 +19,8 @@ app.get("/", (req, res) => {
 
 app.use("/api", GeneralRoutes);
 app.use("/api/employee", EmployeeRoutes);
+app.use("/api/course", CourseRoutes);
+app.use("/api/department", DeptRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
