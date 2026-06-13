@@ -1,159 +1,80 @@
 import { useState } from "react";
-import { Loader } from 'lucide-react';
+import Navbar from "../components/Navbar";
+import Sidebar from "../components/Sidebar";
 
 export default function Courses() {
-  const [courses, setCourses] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
+  const [courses, setCourses] = useState(
+    JSON.parse(localStorage.getItem("courses")) || []
+  );
+  const [courseName, setCourseName] = useState("");
 
-  const [form, setForm] = useState({
-    course_id: "",
-    course_name: "",
-    source: "",
-    duration_days: "",
-    course_type: "",
-    created_by: "",
-  });
-
-  const handleChange = (e) => {
-    setForm({
-      ...form,
-      [e.target.name]: e.target.value,
-    });
-  };
-
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
 
-    if(!form.course_name || !form.course_id || !form.source || !form.duration_days || !form.course_type || !form.created_by) {
-        setMessage("All fields are required.");
-        return;
-    }
+    if (!courseName.trim()) return;
 
-    try {
-      setLoading(true);
-      const res = await fetch("http://localhost:3000/api/course", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(form),
-      });
-
-      if (!res.ok) {
-        const errorData = await res.json();
-        console.error("Error adding course:", errorData.message);
-      }
-      console.log(res);
-
-      setMessage("Course added successfully!");
-      setCourses([...courses, form]);
-
-      setForm({
-        course_id: "",
-        course_name: "",
-        source: "",
-        duration_days: "",
-        course_type: "",
-        created_by: "",
-      });
-    } catch (error) {
-      console.error("Error adding course:", error);
-    } finally {
-      setLoading(false);
-    }
+    const updatedCourses = [...courses, courseName];
+    setCourses(updatedCourses);
+    localStorage.setItem("courses", JSON.stringify(updatedCourses));
+    setCourseName("");
   };
 
   return (
-    <div className="bg-white p-6 rounded-xl shadow">
-      <h1 className="text-2xl font-bold mb-5 !text-black">
-        Courses
-      </h1>
+    <div className="min-h-screen bg-gray-100 text-black">
+      <Navbar />
 
-      <form
-        onSubmit={handleSubmit}
-        className="grid grid-cols-2 gap-4"
-      >
-        <input
-          name="course_id"
-          value={form.course_id}
-          onChange={handleChange}
-          placeholder="Course ID"
-          className="border p-2 rounded"
-        />
+      <div className="flex">
+        <Sidebar />
 
-        <input
-          name="course_name"
-          value={form.course_name}
-          onChange={handleChange}
-          placeholder="Course Name"
-          className="border p-2 rounded"
-        />
+        <main className="flex-1 p-6">
+          <div className="bg-white border rounded p-4">
+            <div className="flex items-center gap-4 mb-4">
+              <h1 className="text-2xl font-bold !text-black">Courses</h1>
+              <div className="flex-1 h-px bg-gray-300" />
+            </div>
 
-        <input
-          name="source"
-          value={form.source}
-          onChange={handleChange}
-          placeholder="Source"
-          className="border p-2 rounded"
-        />
+            <p className="text-gray-600 mb-6">
+              Add course names below
+              <br/>
+              <br/>
+            </p>
 
-        <input
-          name="duration_days"
-          value={form.duration_days}
-          onChange={handleChange}
-          placeholder="Duration Days"
-          className="border p-2 rounded"
-        />
+            <form onSubmit={handleSubmit} className="flex flex-col md:flex-row gap-3">
+              <input
+                type="text"
+                value={courseName}
+                onChange={(e) => setCourseName(e.target.value)}
+                placeholder="Enter Course Name"
+                className="flex-1 border rounded px-3 py-2 bg-white"
+              />
+              <button
+                type="submit"
+                className="border px-4 py-2 rounded bg-gray-100 hover:bg-gray-200"
+              >
+                Add
+              </button>
+            </form>
 
-        <input
-          name="course_type"
-          value={form.course_type}
-          onChange={handleChange}
-          placeholder="Course Type"
-          className="border p-2 rounded"
-        />
+            <div className="mt-8">
+              <h2 className="text-lg font-semibold mb-3 !text-black">
+                Saved Courses
+              </h2>
 
-        <input
-          name="created_by"
-          value={form.created_by}
-          onChange={handleChange}
-          placeholder="Created By"
-          className="border p-2 rounded"
-        />
-
-        <button
-          type="submit"
-          disabled={loading}
-          className="bg-purple-600 text-white rounded p-2"
-        >
-          Save Course
-        </button>
-        {loading && <Loader className="animate-spin" />}
-        <p>{message}</p>
-      </form>
-
-      <table className="w-full border mt-6">
-        <thead>
-          <tr>
-            <th className="border p-2">ID</th>
-            <th className="border p-2">Course</th>
-            <th className="border p-2">Source</th>
-            <th className="border p-2">Duration</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          {courses.map((course, index) => (
-            <tr key={index}>
-              <td className="border p-2">{course.course_id}</td>
-              <td className="border p-2">{course.course_name}</td>
-              <td className="border p-2">{course.source}</td>
-              <td className="border p-2">{course.duration_days}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+              {courses.length === 0 ? (
+                <p className="text-gray-600">No courses added yet.</p>
+              ) : (
+                <ul className="space-y-2">
+                  {courses.map((course, index) => (
+                    <li key={index} className="border rounded p-3 bg-gray-50">
+                      {course}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </div>
+        </main>
+      </div>
     </div>
   );
 }
