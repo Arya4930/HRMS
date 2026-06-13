@@ -1,16 +1,18 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import Navbar from "../components/Navbar";
+import Sidebar from "../components/Sidebar";
 
 export default function EmployeeDetails() {
-  const [employees, setEmployees] = useState([]);
+  const navigate = useNavigate();
 
   const [form, setForm] = useState({
-    employee_id: "",
-    first_name: "",
-    last_name: "",
+    employeeId: "",
+    name: "",
+    department: "",
     email: "",
-    phone_number: "",
-    salary: "",
-    job_title: "",
+    phone: "",
+    joiningDate: "",
   });
 
   const handleChange = (e) => {
@@ -23,128 +25,147 @@ export default function EmployeeDetails() {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    setEmployees([...employees, form]);
+    const values = Object.values(form).map((value) => value.trim());
+    if (values.some((value) => !value)) {
+      alert("Please fill all fields");
+      return;
+    }
 
-    setForm({
-      employee_id: "",
-      first_name: "",
-      last_name: "",
-      email: "",
-      phone_number: "",
-      salary: "",
-      job_title: "",
-    });
+    const employees =
+      JSON.parse(localStorage.getItem("employees")) || [];
+
+    const duplicate = employees.some(
+      (emp) => emp.employeeId === form.employeeId
+    );
+
+    if (duplicate) {
+      alert("Employee ID already exists");
+      return;
+    }
+
+    const updatedEmployees = [...employees, form];
+    localStorage.setItem("employees", JSON.stringify(updatedEmployees));
+    localStorage.setItem("selectedEmployee", JSON.stringify(form));
+
+    alert("Employee saved successfully");
+    navigate("/employees");
   };
 
   return (
-    <div className="bg-white p-6 rounded-xl shadow">
+    <div className="min-h-screen bg-gray-100 text-black">
+      <Navbar />
 
-      <h1 className="text-2xl font-bold mb-5 !text-black">
-        Employee Details
-      </h1>
+      <div className="flex">
+        <Sidebar />
 
-      <form
-        onSubmit={handleSubmit}
-        className="grid grid-cols-2 gap-4"
-      >
+        <main className="flex-1 p-6">
+          <div className="bg-white border rounded p-4">
+            <div className="flex items-center gap-4 mb-4">
+              <h1 className="text-2xl font-bold !text-black">
+                Employee Details
+              </h1>
+              <div className="flex-1 h-px bg-gray-300" />
+            </div>
 
-        <input
-          name="employee_id"
-          value={form.employee_id}
-          onChange={handleChange}
-          placeholder="Employee ID"
-          className="border p-2 rounded"
-        />
+            <p className="text-gray-600 mb-6">
+              Fill in the employee information below
+              <br/>
+              <br />
+            </p>
 
-        <input
-          name="first_name"
-          value={form.first_name}
-          onChange={handleChange}
-          placeholder="First Name"
-          className="border p-2 rounded"
-        />
+            <form
+              onSubmit={handleSubmit}
+              className="grid grid-cols-1 md:grid-cols-2 gap-4"
+            >
+              <div>
+                <label className="block mb-2 text-sm font-medium">
+                  Employee ID
+                </label>
+                <input
+                  type="text"
+                  name="employeeId"
+                  value={form.employeeId}
+                  onChange={handleChange}
+                  className="w-full border rounded px-3 py-2 bg-white"
+                  placeholder="Enter Employee ID"
+                />
+              </div>
 
-        <input
-          name="last_name"
-          value={form.last_name}
-          onChange={handleChange}
-          placeholder="Last Name"
-          className="border p-2 rounded"
-        />
+              <div>
+                <label className="block mb-2 text-sm font-medium">Name</label>
+                <input
+                  type="text"
+                  name="name"
+                  value={form.name}
+                  onChange={handleChange}
+                  className="w-full border rounded px-3 py-2 bg-white"
+                  placeholder="Enter Name"
+                />
+              </div>
 
-        <input
-          name="email"
-          value={form.email}
-          onChange={handleChange}
-          placeholder="Email"
-          className="border p-2 rounded"
-        />
+              <div>
+                <label className="block mb-2 text-sm font-medium">
+                  Department
+                </label>
+                <input
+                  type="text"
+                  name="department"
+                  value={form.department}
+                  onChange={handleChange}
+                  className="w-full border rounded px-3 py-2 bg-white"
+                  placeholder="Enter Department"
+                />
+              </div>
 
-        <input
-          name="phone_number"
-          value={form.phone_number}
-          onChange={handleChange}
-          placeholder="Phone Number"
-          className="border p-2 rounded"
-        />
+              <div>
+                <label className="block mb-2 text-sm font-medium">Email</label>
+                <input
+                  type="email"
+                  name="email"
+                  value={form.email}
+                  onChange={handleChange}
+                  className="w-full border rounded px-3 py-2 bg-white"
+                  placeholder="Enter Email"
+                />
+              </div>
 
-        <input
-          name="salary"
-          value={form.salary}
-          onChange={handleChange}
-          placeholder="Salary"
-          className="border p-2 rounded"
-        />
+              <div>
+                <label className="block mb-2 text-sm font-medium">Phone</label>
+                <input
+                  type="text"
+                  name="phone"
+                  value={form.phone}
+                  onChange={handleChange}
+                  className="w-full border rounded px-3 py-2 bg-white"
+                  placeholder="Enter Phone Number"
+                />
+              </div>
 
-        <input
-          name="job_title"
-          value={form.job_title}
-          onChange={handleChange}
-          placeholder="Job Title"
-          className="border p-2 rounded"
-        />
+              <div>
+                <label className="block mb-2 text-sm font-medium">
+                  Joining Date
+                </label>
+                <input
+                  type="date"
+                  name="joiningDate"
+                  value={form.joiningDate}
+                  onChange={handleChange}
+                  className="w-full border rounded px-3 py-2 bg-white"
+                />
+              </div>
 
-        <button
-          type="submit"
-          className="bg-blue-600 text-white rounded p-2"
-        >
-          Save Employee
-        </button>
-
-      </form>
-
-      <div className="mt-8">
-        <h2 className="text-xl font-semibold mb-3">
-          Employee Records
-        </h2>
-
-        <table className="w-full border">
-          <thead>
-            <tr className="bg-gray-100">
-              <th className="border p-2">ID</th>
-              <th className="border p-2">Name</th>
-              <th className="border p-2">Email</th>
-              <th className="border p-2">Phone</th>
-              <th className="border p-2">Salary</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {employees.map((emp, index) => (
-              <tr key={index}>
-                <td className="border p-2">{emp.employee_id}</td>
-                <td className="border p-2">
-                  {emp.first_name} {emp.last_name}
-                </td>
-                <td className="border p-2">{emp.email}</td>
-                <td className="border p-2">{emp.phone_number}</td>
-                <td className="border p-2">{emp.salary}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+              <div className="md:col-span-2 pt-2">
+                <button
+                  type="submit"
+                  className="bg-black text-white px-4 py-2 rounded hover:bg-gray-800"
+                >
+                  Save Employee
+                </button>
+              </div>
+            </form>
+          </div>
+        </main>
       </div>
-
     </div>
   );
 }
