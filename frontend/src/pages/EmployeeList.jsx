@@ -3,6 +3,35 @@ import { Link, useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
 
+function getEmployeeName(employee) {
+  return (
+    [employee.firstName, employee.lastName].filter(Boolean).join(" ") ||
+    employee.name ||
+    "Unnamed Employee"
+  );
+}
+
+function getSearchableEmployeeText(employee) {
+  return [
+    employee.employeeId,
+    employee.firstName,
+    employee.lastName,
+    getEmployeeName(employee),
+    employee.email,
+    employee.phone_number,
+    employee.date_of_birth,
+    employee.hire_date,
+    employee.jobTitle,
+    employee.department_id ,
+    employee.status,
+    employee.zipcode,
+    employee.address,
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+}
+
 export default function EmployeeList() {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
@@ -15,14 +44,7 @@ export default function EmployeeList() {
     if (!term) return employees;
 
     return employees.filter((employee) => {
-      return (
-        employee.employeeId.toLowerCase().includes(term) ||
-        employee.name.toLowerCase().includes(term) ||
-        employee.department.toLowerCase().includes(term) ||
-        employee.email.toLowerCase().includes(term) ||
-        employee.phone.toLowerCase().includes(term) ||
-        employee.joiningDate.toLowerCase().includes(term)
-      );
+      return getSearchableEmployeeText(employee).includes(term);
     });
   }, [employees, searchTerm]);
 
@@ -48,14 +70,14 @@ export default function EmployeeList() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 text-black">
+    <div className="h-screen overflow-hidden bg-gray-100 text-black flex flex-col">
       <Navbar />
 
-      <div className="flex">
+      <div className="flex flex-1 min-h-0 overflow-hidden">
         <Sidebar />
 
-        <main className="flex-1 p-6">
-          <div className="bg-white border rounded p-4">
+        <main className="flex-1 min-h-0 p-6 overflow-hidden">
+          <div className="bg-white border rounded p-4 h-full flex flex-col min-h-0">
             <div className="flex items-center gap-4 mb-4">
               <h1 className="text-2xl font-bold !text-black">
                 Employee List
@@ -86,16 +108,22 @@ export default function EmployeeList() {
               </Link>
             </div>
 
-            <div className="overflow-x-auto">
-              <table className="w-full border">
+            <div className="flex-1 min-h-0 overflow-auto">
+              <table className="w-full min-w-[1400px] border">
                 <thead className="bg-gray-100">
                   <tr>
                     <th className="border p-2 text-left">Employee ID</th>
-                    <th className="border p-2 text-left">Name</th>
-                    <th className="border p-2 text-left">Department</th>
+                    <th className="border p-2 text-left">First Name</th>
+                    <th className="border p-2 text-left">Last Name</th>
                     <th className="border p-2 text-left">Email</th>
                     <th className="border p-2 text-left">Phone</th>
-                    <th className="border p-2 text-left">Joining Date</th>
+                    <th className="border p-2 text-left">Date of Birth</th>
+                    <th className="border p-2 text-left">Hiring Date</th>
+                    <th className="border p-2 text-left">Job Title</th>
+                    <th className="border p-2 text-left">Department</th>
+                    <th className="border p-2 text-left">Status</th>
+                    <th className="border p-2 text-left">Zipcode</th>
+                    <th className="border p-2 text-left">Address</th>
                     <th className="border p-2 text-left">Action</th>
                   </tr>
                 </thead>
@@ -103,7 +131,7 @@ export default function EmployeeList() {
                 <tbody>
                   {filteredEmployees.length === 0 ? (
                     <tr>
-                      <td className="border p-3" colSpan="7">
+                      <td className="border p-3" colSpan="13">
                         No employees found.
                       </td>
                     </tr>
@@ -111,11 +139,17 @@ export default function EmployeeList() {
                     filteredEmployees.map((employee, index) => (
                       <tr key={index}>
                         <td className="border p-2">{employee.employeeId}</td>
-                        <td className="border p-2">{employee.name}</td>
-                        <td className="border p-2">{employee.department}</td>
+                        <td className="border p-2">{employee.firstName || "-"}</td>
+                        <td className="border p-2">{employee.lastName || "-"}</td>
                         <td className="border p-2">{employee.email}</td>
-                        <td className="border p-2">{employee.phone}</td>
-                        <td className="border p-2">{employee.joiningDate}</td>
+                        <td className="border p-2">{employee.phone_number || "-"}</td>
+                        <td className="border p-2">{employee.date_of_birth || "-"}</td>
+                        <td className="border p-2">{employee.hire_date || "-"}</td>
+                        <td className="border p-2">{employee.jobTitle || "-"}</td>
+                        <td className="border p-2">{employee.department_id || "-"}</td>
+                        <td className="border p-2">{employee.status || "-"}</td>
+                        <td className="border p-2">{employee.zipcode || "-"}</td>
+                        <td className="border p-2">{employee.address || "-"}</td>
                         <td className="border p-2">
                           <button
                             onClick={() => handleViewProfile(employee)}

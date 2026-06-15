@@ -10,7 +10,7 @@ export default function Navbar() {
 
   return (
     <header className="bg-white border-b">
-      <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+      <div className="mx-auto px-4 py-4 flex items-center justify-between">
         <div>
           <h1 className="text-xl font-bold !text-black">HRMS</h1>
         </div>

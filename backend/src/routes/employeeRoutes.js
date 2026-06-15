@@ -20,11 +20,11 @@ router.get("/:id", (req, res) => {
 })
 
 router.post("/", (req, res) => {
-    const { first_name, last_name, email, phone_number, date_of_birth, hire_date, job_title, department_id, status } = req.body;
+    const { emp_id, first_name, last_name, email, phone_number, date_of_birth, hire_date, job_title, department_id, status } = req.body;
 
     console.log("Received employee data:", req.body); // Debugging log
 
-    if(!first_name || !last_name || !email || !phone_number || !date_of_birth || !hire_date || !job_title || !department_id || !status) {
+    if(!emp_id || !first_name || !last_name || !email || !phone_number || !date_of_birth || !hire_date || !job_title || !department_id || !status) {
         return res.status(400).json({ message: "All fields are required." });
     }
 
@@ -59,11 +59,11 @@ router.post("/", (req, res) => {
 
 router.put("/:id", (req, res) => {
     const { id } = req.params;
-    const { first_name, last_name, email, phone_number, date_of_birth, hire_date, job_title, department_id, status } = req.body;
+    const { emp_id, first_name, last_name, email, phone_number, date_of_birth, hire_date, job_title, department_id, status, zipcode, address } = req.body;
 
     console.log("Received employee update data:", req.body); // Debugging log
 
-    if(!first_name || !last_name || !email || !phone_number || !date_of_birth || !hire_date || !job_title || !department_id || !status) {
+    if(!emp_id || !first_name || !last_name || !email || !phone_number || !date_of_birth || !hire_date || !job_title || !department_id || !status || !address) {
         return res.status(400).json({ message: "All fields are required." });
     }
 
