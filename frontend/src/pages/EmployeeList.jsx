@@ -78,7 +78,7 @@ export default function EmployeeList() {
     });
   }, [employees, searchTerm]);
 
-  const handleViewProfile = (employee) => {
+  const handleEditEmployee = (employee) => {
     const recentSearches =
       JSON.parse(localStorage.getItem("recentSearches")) || [];
 
@@ -94,7 +94,7 @@ export default function EmployeeList() {
       JSON.stringify(updatedRecentSearches)
     );
 
-    navigate(`/employee-profile/${employee.emp_id}`, { state: { employee } });
+    navigate(`/edit-employee/${employee.emp_id}`);
   };
 
   return (
@@ -180,7 +180,7 @@ export default function EmployeeList() {
                         <td className="border p-2">{employee.address || "-"}</td>
                         <td className="border p-2">
                           <button
-                            onClick={() => handleViewProfile(employee)}
+                            onClick={() => handleEditEmployee(employee)}
                             className="border px-3 py-1 rounded bg-gray-100 hover:bg-gray-200"
                           >
                             <SquarePen className="w-4 h-4" />

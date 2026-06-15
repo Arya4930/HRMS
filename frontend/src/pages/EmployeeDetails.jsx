@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
 
@@ -42,7 +42,9 @@ function formatAddress(record) {
 
 export default function EmployeeDetails() {
   const navigate = useNavigate();
+  const { id } = useParams();
   const [zipcodes, setZipcodes] = useState([]);
+  const [isLoadingEmployee, setIsLoadingEmployee] = useState(false);
 
   const [form, setForm] = useState({
     emp_id: "",
@@ -58,6 +60,8 @@ export default function EmployeeDetails() {
     zipcode: "",
     address: "",
   });
+
+  const isEditing = Boolean(id);
 
   useEffect(() => {
     const fetchZipcodes = async () => {
@@ -92,6 +96,48 @@ export default function EmployeeDetails() {
 
     fetchZipcodes();
   }, []);
+
+  useEffect(() => {
+    if (!isEditing) {
+      return;
+    }
+
+    const fetchEmployee = async () => {
+      try {
+        setIsLoadingEmployee(true);
+
+        const response = await fetch(`http://localhost:3000/api/employees/${id}`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch employee details");
+        }
+
+        const employee = await response.json();
+
+        setForm({
+          emp_id: employee.emp_id || "",
+          first_name: employee.first_name || "",
+          last_name: employee.last_name || "",
+          email: employee.email || "",
+          phone: employee.phone || "",
+          date_of_birth: employee.date_of_birth || "",
+          hire_date: employee.hire_date || "",
+          job_title: employee.job_title || "",
+          department_id: employee.department_id || "",
+          status: employee.status || "",
+          zipcode: employee.zipcode || "",
+          address: employee.address || "",
+        });
+      } catch (error) {
+        console.error("Error fetching employee:", error);
+        alert("Unable to load employee details for editing.");
+        navigate("/employees");
+      } finally {
+        setIsLoadingEmployee(false);
+      }
+    };
+
+    fetchEmployee();
+  }, [id, isEditing, navigate]);
 
   const matchingAddresses = useMemo(() => {
     const zip = form.zipcode.trim();
@@ -148,24 +194,29 @@ export default function EmployeeDetails() {
     }
 
     try {
-      const res = await fetch("http://localhost:3000/api/employees", {
-        method: "POST",
+      const res = await fetch(
+        isEditing
+          ? `http://localhost:3000/api/employees/${id}`
+          : "http://localhost:3000/api/employees",
+        {
+        method: isEditing ? "PUT" : "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(form),
-      });
+        }
+      );
       if(!res.ok) {
         const errorData = await res.json();
-        throw new Error(errorData.message || "Failed to save employee");
+        throw new Error(errorData.message || (isEditing ? "Failed to update employee" : "Failed to save employee"));
       }
       const data = await res.json();
-      console.log("Employee saved:", data);
-      alert("Employee saved successfully");
+      console.log(isEditing ? "Employee updated:" : "Employee saved:", data);
+      alert(isEditing ? "Employee updated successfully" : "Employee saved successfully");
       navigate("/employees");
     } catch (error) {
-      console.error("Error saving employee:", error);
-      alert(error.message || "Error saving employee");
+      console.error(isEditing ? "Error updating employee:" : "Error saving employee:", error);
+      alert(error.message || (isEditing ? "Error updating employee" : "Error saving employee"));
     }
   };
 
@@ -180,20 +231,29 @@ export default function EmployeeDetails() {
           <div className="bg-white border rounded p-4">
             <div className="flex items-center gap-4 mb-4">
               <h1 className="text-2xl font-bold !text-black">
-                Employee Details
+                {isEditing ? "Edit Employee" : "Employee Details"}
               </h1>
               <div className="flex-1 h-px bg-gray-300" />
             </div>
 
             <p className="text-gray-600 mb-6">
-              Fill in the employee information below
+              {isEditing
+                ? "Update the employee information below"
+                : "Fill in the employee information below"}
               <br />
               <br />
             </p>
 
+            {isLoadingEmployee ? (
+              <div className="py-10 text-center text-gray-600">
+                Loading employee details...
+              </div>
+            ) : null}
+
             <form
               onSubmit={handleSubmit}
               className="grid grid-cols-1 md:grid-cols-2 gap-4"
+              style={{ display: isLoadingEmployee ? "none" : undefined }}
             >
               <div>
                 <label className="block mb-2 text-sm font-medium">
@@ -380,7 +440,7 @@ export default function EmployeeDetails() {
                   type="submit"
                   className="bg-black text-white px-4 py-2 rounded hover:bg-gray-800"
                 >
-                  Save Employee
+                  {isEditing ? "Update Employee" : "Save Employee"}
                 </button>
               </div>
             </form>
