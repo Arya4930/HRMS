@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
 
@@ -10,7 +10,8 @@ export default function Dashboard() {
 
   const openEmployee = (employee) => {
     localStorage.setItem("selectedEmployee", JSON.stringify(employee));
-    navigate("/employee-profile");
+    const employeeId = employee.emp_id || employee.employeeId;
+    navigate(employeeId ? `/employee-profile/${employeeId}` : "/employee-profile");
   };
 
   return (

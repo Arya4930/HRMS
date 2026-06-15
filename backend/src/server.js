@@ -18,7 +18,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api", GeneralRoutes);
-app.use("/api/employee", EmployeeRoutes);
+app.use("/api/employees", EmployeeRoutes);
 app.use("/api/course", CourseRoutes);
 app.use("/api/department", DeptRoutes);
 
