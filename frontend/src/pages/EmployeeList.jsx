@@ -1,11 +1,12 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
+import { SquarePen } from "lucide-react";
 
 function getEmployeeName(employee) {
   return (
-    [employee.firstName, employee.lastName].filter(Boolean).join(" ") ||
+    [employee.first_name, employee.last_name].filter(Boolean).join(" ") ||
     employee.name ||
     "Unnamed Employee"
   );
@@ -13,15 +14,15 @@ function getEmployeeName(employee) {
 
 function getSearchableEmployeeText(employee) {
   return [
-    employee.employeeId,
-    employee.firstName,
-    employee.lastName,
+    employee.emp_id,
+    employee.first_name,
+    employee.last_name,
     getEmployeeName(employee),
     employee.email,
-    employee.phone_number,
+    employee.phone,
     employee.date_of_birth,
     employee.hire_date,
-    employee.jobTitle,
+    employee.job_title,
     employee.department_id ,
     employee.status,
     employee.zipcode,
@@ -35,8 +36,37 @@ function getSearchableEmployeeText(employee) {
 export default function EmployeeList() {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
+  const [employees, setEmployees] = useState([]);
 
-  const employees = JSON.parse(localStorage.getItem("employees")) || [];
+  useEffect(() => {
+    const fetchEmployees = async () => {
+      try {
+        const response = await fetch("http://localhost:3000/api/employees");
+        if (!response.ok) {
+          throw new Error("Failed to fetch employees");
+        }
+        const data = await response.json();
+        const normalizedEmployees = Array.isArray(data)
+          ? data
+          : Array.isArray(data?.employees)
+            ? data.employees
+            : Array.isArray(data?.data)
+              ? data.data
+              : [];
+
+        setEmployees(
+          normalizedEmployees.length > 0
+            ? normalizedEmployees
+            : []
+        );
+      } catch (error) {
+        console.error("Error fetching employees:", error);
+        setEmployees([]);
+      }
+    };
+
+    fetchEmployees();
+  }, []);
 
   const filteredEmployees = useMemo(() => {
     const term = searchTerm.trim().toLowerCase();
@@ -49,15 +79,13 @@ export default function EmployeeList() {
   }, [employees, searchTerm]);
 
   const handleViewProfile = (employee) => {
-    localStorage.setItem("selectedEmployee", JSON.stringify(employee));
-
     const recentSearches =
       JSON.parse(localStorage.getItem("recentSearches")) || [];
 
     const updatedRecentSearches = [
       employee,
       ...recentSearches.filter(
-        (item) => item.employeeId !== employee.employeeId
+        (item) => item.emp_id !== employee.emp_id
       ),
     ].slice(0, 5);
 
@@ -66,7 +94,7 @@ export default function EmployeeList() {
       JSON.stringify(updatedRecentSearches)
     );
 
-    navigate("/employee-profile");
+    navigate(`/employee-profile/${employee.emp_id}`, { state: { employee } });
   };
 
   return (
@@ -124,7 +152,7 @@ export default function EmployeeList() {
                     <th className="border p-2 text-left">Status</th>
                     <th className="border p-2 text-left">Zipcode</th>
                     <th className="border p-2 text-left">Address</th>
-                    <th className="border p-2 text-left">Action</th>
+                    <th className="border p-2 text-left">Edit</th>
                   </tr>
                 </thead>
 
@@ -138,14 +166,14 @@ export default function EmployeeList() {
                   ) : (
                     filteredEmployees.map((employee, index) => (
                       <tr key={index}>
-                        <td className="border p-2">{employee.employeeId}</td>
-                        <td className="border p-2">{employee.firstName || "-"}</td>
-                        <td className="border p-2">{employee.lastName || "-"}</td>
+                        <td className="border p-2">{employee.emp_id}</td>
+                        <td className="border p-2">{employee.first_name || "-"}</td>
+                        <td className="border p-2">{employee.last_name || "-"}</td>
                         <td className="border p-2">{employee.email}</td>
-                        <td className="border p-2">{employee.phone_number || "-"}</td>
+                        <td className="border p-2">{employee.phone || "-"}</td>
                         <td className="border p-2">{employee.date_of_birth || "-"}</td>
                         <td className="border p-2">{employee.hire_date || "-"}</td>
-                        <td className="border p-2">{employee.jobTitle || "-"}</td>
+                        <td className="border p-2">{employee.job_title || "-"}</td>
                         <td className="border p-2">{employee.department_id || "-"}</td>
                         <td className="border p-2">{employee.status || "-"}</td>
                         <td className="border p-2">{employee.zipcode || "-"}</td>
@@ -155,7 +183,7 @@ export default function EmployeeList() {
                             onClick={() => handleViewProfile(employee)}
                             className="border px-3 py-1 rounded bg-gray-100 hover:bg-gray-200"
                           >
-                            View Profile
+                            <SquarePen className="w-4 h-4" />
                           </button>
                         </td>
                       </tr>

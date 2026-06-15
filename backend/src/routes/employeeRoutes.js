@@ -20,11 +20,11 @@ router.get("/:id", (req, res) => {
 })
 
 router.post("/", (req, res) => {
-    const { emp_id, first_name, last_name, email, phone_number, date_of_birth, hire_date, job_title, department_id, status } = req.body;
+    const { emp_id, first_name, last_name, email, phone, date_of_birth, hire_date, job_title, department_id, status, zipcode, address } = req.body;
 
     console.log("Received employee data:", req.body); // Debugging log
 
-    if(!emp_id || !first_name || !last_name || !email || !phone_number || !date_of_birth || !hire_date || !job_title || !department_id || !status) {
+    if(!emp_id || !first_name || !last_name || !email || !phone || !date_of_birth || !hire_date || !job_title || !department_id || !status) {
         return res.status(400).json({ message: "All fields are required." });
     }
 
@@ -38,7 +38,7 @@ router.post("/", (req, res) => {
         return res.status(400).json({ message: "Invalid email format." });
     }
 
-    if(!/^\d{10}$/.test(phone_number)) {
+    if(!/^\d{10}$/.test(phone)) {
         return res.status(400).json({ message: "Phone number should be 10 digits." });
     }
 
@@ -59,11 +59,11 @@ router.post("/", (req, res) => {
 
 router.put("/:id", (req, res) => {
     const { id } = req.params;
-    const { emp_id, first_name, last_name, email, phone_number, date_of_birth, hire_date, job_title, department_id, status, zipcode, address } = req.body;
+    const { emp_id, first_name, last_name, email, phone, date_of_birth, hire_date, job_title, department_id, status, zipcode, address } = req.body;
 
     console.log("Received employee update data:", req.body); // Debugging log
 
-    if(!emp_id || !first_name || !last_name || !email || !phone_number || !date_of_birth || !hire_date || !job_title || !department_id || !status || !address) {
+    if(!emp_id || !first_name || !last_name || !email || !phone || !date_of_birth || !hire_date || !job_title || !department_id || !status || !address) {
         return res.status(400).json({ message: "All fields are required." });
     }
 
@@ -77,7 +77,7 @@ router.put("/:id", (req, res) => {
         return res.status(400).json({ message: "Invalid email format." });
     }
 
-    if(!/^\d{10}$/.test(phone_number)) {
+    if(!/^\d{10}$/.test(phone)) {
         return res.status(400).json({ message: "Phone number should be 10 digits." });
     }
 

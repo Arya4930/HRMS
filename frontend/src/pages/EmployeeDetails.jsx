@@ -42,36 +42,22 @@ function formatAddress(record) {
 
 export default function EmployeeDetails() {
   const navigate = useNavigate();
-  const [employees, setEmployees] = useState([]);
   const [zipcodes, setZipcodes] = useState([]);
 
   const [form, setForm] = useState({
-    employeeId: "",
-    firstName: "",
-    lastName: "",
+    emp_id: "",
+    first_name: "",
+    last_name: "",
     email: "",
     phone: "",
-    dateOfBirth: "",
-    hireDate: "",
-    jobTitle: "",
-    departmentId: "",
+    date_of_birth: "",
+    hire_date: "",
+    job_title: "",
+    department_id: "",
     status: "",
     zipcode: "",
     address: "",
   });
-
-  useEffect(() => {
-    const fetchEmployees = async () => {
-      try {
-        const employees = await fetch("http://localhost:3000/api/employees");
-        const data = await employees.json();
-        setEmployees(data);
-      } catch (error) {
-        console.error("Error fetching employees:", error);
-      }
-    }
-    fetchEmployees();
-  }, []);
 
   useEffect(() => {
     const fetchZipcodes = async () => {
@@ -157,6 +143,7 @@ export default function EmployeeDetails() {
     const values = Object.values(form).map((value) => value.trim());
     if (values.some((value) => !value)) {
       alert("Please fill all fields");
+      console.log("this field not filled: ", form);
       return;
     }
 
@@ -168,18 +155,18 @@ export default function EmployeeDetails() {
         },
         body: JSON.stringify(form),
       });
+      if(!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || "Failed to save employee");
+      }
       const data = await res.json();
       console.log("Employee saved:", data);
-      const updatedEmployees = [...employees, form];
-      localStorage.setItem("employees", JSON.stringify(updatedEmployees));
-      localStorage.setItem("selectedEmployee", JSON.stringify(form));
-
       alert("Employee saved successfully");
+      navigate("/employees");
     } catch (error) {
       console.error("Error saving employee:", error);
-      alert("Error saving employee");
+      alert(error.message || "Error saving employee");
     }
-    navigate("/employees");
   };
 
   return (
@@ -214,8 +201,8 @@ export default function EmployeeDetails() {
                 </label>
                 <input
                   type="text"
-                  name="employeeId"
-                  value={form.employeeId}
+                  name="emp_id"
+                  value={form.emp_id}
                   onChange={handleChange}
                   className="w-full border rounded px-3 py-2 bg-white"
                   placeholder="Enter Employee ID"
@@ -226,8 +213,8 @@ export default function EmployeeDetails() {
                 <label className="block mb-2 text-sm font-medium">First Name</label>
                 <input
                   type="text"
-                  name="firstName"
-                  value={form.firstName}
+                  name="first_name"
+                  value={form.first_name}
                   onChange={handleChange}
                   className="w-full border rounded px-3 py-2 bg-white"
                   placeholder="Enter First Name"
@@ -240,8 +227,8 @@ export default function EmployeeDetails() {
                 </label>
                 <input
                   type="text"
-                  name="lastName"
-                  value={form.lastName}
+                  name="last_name"
+                  value={form.last_name}
                   onChange={handleChange}
                   className="w-full border rounded px-3 py-2 bg-white"
                   placeholder="Enter Last Name"
@@ -278,8 +265,8 @@ export default function EmployeeDetails() {
                 </label>
                 <input
                   type="date"
-                  name="hiringDate"
-                  value={form.hiringDate}
+                  name="hire_date"
+                  value={form.hire_date}
                   onChange={handleChange}
                   className="w-full border rounded px-3 py-2 bg-white"
                 />
@@ -291,8 +278,8 @@ export default function EmployeeDetails() {
                 </label>
                 <input
                   type="date"
-                  name="birthDate"
-                  value={form.birthDate}
+                  name="date_of_birth"
+                  value={form.date_of_birth}
                   onChange={handleChange}
                   className="w-full border rounded px-3 py-2 bg-white"
                 />
@@ -304,8 +291,8 @@ export default function EmployeeDetails() {
                 </label>
                 <input
                   type="text"
-                  name="jobTitle"
-                  value={form.jobTitle}
+                  name="job_title"
+                  value={form.job_title}
                   onChange={handleChange}
                   className="w-full border rounded px-3 py-2 bg-white"
                   placeholder="Enter Job Title"
@@ -318,8 +305,8 @@ export default function EmployeeDetails() {
                 </label>
                 <input
                   type="text"
-                  name="departmentId"
-                  value={form.departmentId}
+                  name="department_id"
+                  value={form.department_id}
                   onChange={handleChange}
                   className="w-full border rounded px-3 py-2 bg-white"
                   placeholder="Enter Department ID"
