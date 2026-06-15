@@ -64,6 +64,15 @@ export default function App() {
         />
 
         <Route
+          path="/employee-profile/:id"
+          element={
+            <ProtectedRoute>
+              <EmployeeProfile />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
           path="/departments"
           element={
             <ProtectedRoute>
