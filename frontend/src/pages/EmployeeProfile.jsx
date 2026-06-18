@@ -1,15 +1,106 @@
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
 
 export default function EmployeeProfile() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { id } = useParams();
+
   const selectedEmployee =
-    JSON.parse(localStorage.getItem("selectedEmployee")) || null;
+    location.state?.employee ||
+    JSON.parse(localStorage.getItem("selectedEmployee")) ||
+    null;
 
   const lastSavedEmployee =
     (JSON.parse(localStorage.getItem("employees")) || []).at(-1) || null;
 
-  const employee = selectedEmployee || lastSavedEmployee;
+  const [employee, setEmployee] = useState(
+    selectedEmployee || lastSavedEmployee || null
+  );
+  const [isLoading, setIsLoading] = useState(Boolean(id));
+
+  useEffect(() => {
+    if (!id) {
+      return;
+    }
+
+    const fetchEmployee = async () => {
+      try {
+        setIsLoading(true);
+
+        const response = await fetch(`http://localhost:3000/api/employees/${id}`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch employee details");
+        }
+
+        const data = await response.json();
+        setEmployee(data);
+      } catch (error) {
+        console.error("Error fetching employee profile:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchEmployee();
+  }, [id]);
+
+  const handleDelete = async () => {
+    const employeeId = employee?.emp_id;
+
+    if (!employeeId) {
+      alert("No employee id found for this profile.");
+      return;
+    }
+
+    const confirmed = window.confirm(
+      "Delete this employee profile? This action cannot be undone."
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`http://localhost:3000/api/employees/${employeeId}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || "Failed to delete employee");
+      }
+
+      const currentEmployees = JSON.parse(localStorage.getItem("employees")) || [];
+      const updatedEmployees = currentEmployees.filter(
+        (item) => String(item.emp_id) !== String(employeeId)
+      );
+      localStorage.setItem("employees", JSON.stringify(updatedEmployees));
+
+      const currentSelectedEmployee =
+        JSON.parse(localStorage.getItem("selectedEmployee")) || null;
+      if (
+        currentSelectedEmployee &&
+        String(currentSelectedEmployee.emp_id) === String(employeeId)
+      ) {
+        localStorage.removeItem("selectedEmployee");
+      }
+
+      const recentSearches = JSON.parse(localStorage.getItem("recentSearches")) || [];
+      const updatedRecentSearches = recentSearches.filter(
+        (item) => String(item.emp_id) !== String(employeeId)
+      );
+      localStorage.setItem("recentSearches", JSON.stringify(updatedRecentSearches));
+
+      alert("Employee deleted successfully");
+      navigate("/employees");
+    } catch (error) {
+      console.error("Error deleting employee:", error);
+      alert(error.message || "Error deleting employee");
+    }
+  };
 
   if (!employee) {
     return (
@@ -40,6 +131,24 @@ export default function EmployeeProfile() {
     );
   }
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-100 text-black">
+        <Navbar />
+
+        <div className="flex">
+          <Sidebar />
+
+          <main className="flex-1 p-6">
+            <div className="bg-white border rounded p-4 text-center">
+              <h1 className="text-2xl font-bold mb-3">Loading Employee...</h1>
+            </div>
+          </main>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-100 text-black">
       <Navbar />
@@ -62,36 +171,88 @@ export default function EmployeeProfile() {
               <br/>
             </p>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
               <div className="border rounded p-4">
                 <p className="text-sm text-gray-500">Employee ID</p>
-                <p className="font-semibold">{employee.employeeId}</p>
+                <p className="font-semibold">{employee?.emp_id || "-"}</p>
               </div>
 
               <div className="border rounded p-4">
-                <p className="text-sm text-gray-500">Name</p>
-                <p className="font-semibold">{employee.name}</p>
+                <p className="text-sm text-gray-500">First Name</p>
+                <p className="font-semibold">{employee?.first_name || "-"}</p>
               </div>
 
               <div className="border rounded p-4">
-                <p className="text-sm text-gray-500">Department</p>
-                <p className="font-semibold">{employee.department}</p>
+                <p className="text-sm text-gray-500">Last Name</p>
+                <p className="font-semibold">{employee?.last_name || "-"}</p>
+              </div>
+
+              <div className="border rounded p-4">
+                <p className="text-sm text-gray-500">Full Name</p>
+                <p className="font-semibold">{[employee?.first_name, employee?.last_name].filter((value) => value !== "-").join(" ") || employee?.name || "-"}</p>
               </div>
 
               <div className="border rounded p-4">
                 <p className="text-sm text-gray-500">Email</p>
-                <p className="font-semibold">{employee.email}</p>
+                <p className="font-semibold">{employee?.email || "-"}</p>
               </div>
 
               <div className="border rounded p-4">
                 <p className="text-sm text-gray-500">Phone</p>
-                <p className="font-semibold">{employee.phone}</p>
+                <p className="font-semibold">{employee?.phone || "-"}</p>
               </div>
 
               <div className="border rounded p-4">
-                <p className="text-sm text-gray-500">Date of Joining</p>
-                <p className="font-semibold">{employee.joiningDate}</p>
+                <p className="text-sm text-gray-500">Date of Birth</p>
+                <p className="font-semibold">{employee?.date_of_birth || "-"}</p>
               </div>
+
+              <div className="border rounded p-4">
+                <p className="text-sm text-gray-500">Hiring Date</p>
+                <p className="font-semibold">{employee?.hire_date || "-"}</p>
+              </div>
+
+              <div className="border rounded p-4">
+                <p className="text-sm text-gray-500">Job Title</p>
+                <p className="font-semibold">{employee?.job_title || "-"}</p>
+              </div>
+
+              <div className="border rounded p-4">
+                <p className="text-sm text-gray-500">Department</p>
+                <p className="font-semibold">{employee?.department_id || "-"}</p>
+              </div>
+
+              <div className="border rounded p-4">
+                <p className="text-sm text-gray-500">Status</p>
+                <p className="font-semibold">{employee?.status || "-"}</p>
+              </div>
+
+              <div className="border rounded p-4">
+                <p className="text-sm text-gray-500">Zipcode</p>
+                <p className="font-semibold">{employee?.zipcode || "-"}</p>
+              </div>
+
+              <div className="border rounded p-4 md:col-span-2">
+                <p className="text-sm text-gray-500">Address</p>
+                <p className="font-semibold">{employee?.address || "-"}</p>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap gap-3">
+              <Link
+                to="/employees"
+                className="border px-4 py-2 rounded bg-gray-100 hover:bg-gray-200 inline-block"
+              >
+                Back to Employees
+              </Link>
+
+              <button
+                type="button"
+                onClick={handleDelete}
+                className="border px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700"
+              >
+                Delete Profile
+              </button>
             </div>
           </div>
         </main>
