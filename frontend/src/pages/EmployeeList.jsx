@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
 import { SquarePen } from "lucide-react";
+import { API_BASE } from "../main";
 
 function getEmployeeName(employee) {
   return (
@@ -41,7 +42,7 @@ export default function EmployeeList() {
   useEffect(() => {
     const fetchEmployees = async () => {
       try {
-        const response = await fetch("http://localhost:3000/api/employees");
+        const response = await fetch(`${API_BASE}/employees`);
         if (!response.ok) {
           throw new Error("Failed to fetch employees");
         }
@@ -97,107 +98,6 @@ export default function EmployeeList() {
     navigate(`/edit-employee/${employee.emp_id}`);
   };
 
-  const handleEdit = (employee) => {
-    setEditingEmployeeId(employee.employeeId);
-    setEditedEmployee({ ...employee });
-  };
-
-  const handleCancel = () => {
-    setEditingEmployeeId(null);
-    setEditedEmployee(null);
-  };
-
-  const handleChange = (field, value) => {
-    setEditedEmployee((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
-  };
-
-  const handleSave = () => {
-    if (!editedEmployee) return;
-
-    const values = Object.values(editedEmployee).map((value) =>
-      String(value).trim()
-    );
-
-    if (values.some((value) => !value)) {
-      alert("Please fill all fields");
-      return;
-    }
-
-    const duplicate = employees.some(
-      (employee) =>
-        employee.employeeId === editedEmployee.employeeId &&
-        employee.employeeId !== editingEmployeeId
-    );
-
-    if (duplicate) {
-      alert("Employee ID already exists");
-      return;
-    }
-
-    const updatedEmployees = employees.map((employee) =>
-      employee.employeeId === editingEmployeeId ? editedEmployee : employee
-    );
-
-    saveEmployeesToStorage(updatedEmployees);
-
-    const updatedRecentSearches =
-      (JSON.parse(localStorage.getItem("recentSearches")) || []).map((item) =>
-        item.employeeId === editingEmployeeId ? editedEmployee : item
-      );
-
-    localStorage.setItem(
-      "recentSearches",
-      JSON.stringify(updatedRecentSearches)
-    );
-
-    const selectedEmployee = JSON.parse(
-      localStorage.getItem("selectedEmployee")
-    );
-
-    if (selectedEmployee && selectedEmployee.employeeId === editingEmployeeId) {
-      localStorage.setItem(
-        "selectedEmployee",
-        JSON.stringify(editedEmployee)
-      );
-    }
-
-    setEditingEmployeeId(null);
-    setEditedEmployee(null);
-    alert("Employee updated successfully");
-  };
-
-  const handleDelete = (employeeId) => {
-    const updatedEmployees = employees.filter(
-      (employee) => employee.employeeId !== employeeId
-    );
-
-    const updatedRecentSearches =
-      (JSON.parse(localStorage.getItem("recentSearches")) || []).filter(
-        (item) => item.employeeId !== employeeId
-      );
-
-    const selectedEmployee = JSON.parse(
-      localStorage.getItem("selectedEmployee")
-    );
-
-    if (selectedEmployee && selectedEmployee.employeeId === employeeId) {
-      localStorage.removeItem("selectedEmployee");
-    }
-
-    if (editingEmployeeId === employeeId) {
-      handleCancel();
-    }
-
-    saveEmployeesToStorage(updatedEmployees);
-    localStorage.setItem(
-      "recentSearches",
-      JSON.stringify(updatedRecentSearches)
-    );
-  };
-
   return (
     <div className="h-screen overflow-hidden bg-gray-100 text-black flex flex-col">
       <Navbar />
@@ -215,8 +115,7 @@ export default function EmployeeList() {
             </div>
 
             <p className="text-gray-600 mb-6">
-              Search saved employees, view profiles, edit details directly in the
-              table, or delete records.
+              Search saved employees and open their profile
               <br/>
               <br/>
             </p>
@@ -227,7 +126,7 @@ export default function EmployeeList() {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Search by name, department, email, ID..."
-                className="flex-1 border rounded px-3 py-2 bg-white outline-none focus:border-black"
+                className="flex-1 border rounded px-3 py-2 bg-white"
               />
 
               <Link
@@ -299,4 +198,4 @@ export default function EmployeeList() {
       </div>
     </div>
   );
-} 
+}

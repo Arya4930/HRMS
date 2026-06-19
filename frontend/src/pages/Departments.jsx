@@ -1,11 +1,12 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
+import { API_BASE } from "../main";
 
 export default function Departments() {
-  const [departments, setDepartments] = useState(
-    JSON.parse(localStorage.getItem("departments")) || []
-  );
+  const [departments, setDepartments] = useState([]);
+  const [selectedDeparment, setSelectedDeparment] = useState(null);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
 
   const [form, setForm] = useState({
     departmentId: "",
@@ -15,6 +16,25 @@ export default function Departments() {
     location: "",
     budget: "",
   });
+
+  useEffect(() => {
+    const fetchDeparments = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/department`);
+        if (!res.ok) {
+          throw new Error("Failed to fetch deparments");
+        }
+        const data = await res.json();
+        setDepartments(data);
+
+      } catch (err) {
+        alert(err.message || "An error occurred while fetching the deparments");
+        console.log(err);
+      }
+    }
+
+    fetchDeparments();
+  })
 
   const [editIndex, setEditIndex] = useState(null);
 
@@ -63,60 +83,62 @@ export default function Departments() {
     );
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     const values = Object.values(form);
     if (values.some((value) => !String(value).trim())) {
-      alert("Please fill all fields");
+      alert("Please fill all the fields");
       return;
     }
 
-    if (editIndex !== null) {
-      const updatedDepartments = [...departments];
-      const updatedDepartment = {
-        ...updatedDepartments[editIndex],
-        ...form,
-      };
+    try {
+      if (editIndex !== null) {
+        const res = await fetch(`${API_BASE}/department/${departments[editIndex].departmentId}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(form),
+        });
+        if (!res.ok) {
+          throw new Error("Failed to update Department");
+        }
+        const updatedDepts = [...departments];
+        const updatedDept = {
+          ...updatedDepts[editIndex],
+          ...form,
+          createdAt: updatedDepts[editIndex].createdAt,
+        };
 
-      updatedDepartments[editIndex] = updatedDepartment;
+        updatedDepts[editIndex] = updatedDept;
 
-      setDepartments(updatedDepartments);
-      localStorage.setItem(
-        "departments",
-        JSON.stringify(updatedDepartments)
-      );
+        setDepartments(updatedDepts);
+        addToRecentSearches(updatedDept);
+        setEditIndex(null);
+      } else {
+        const res = await fetch(`${API_BASE}/department`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(form),
+        });
+        if (!res.ok) {
+          throw new Error("Failed to add Deparment");
+        }
+        const newDept = await res.json();
+        const updatedDepts = [...departments, newDept];
 
-      addToRecentSearches(updatedDepartment);
-      setEditIndex(null);
-    } else {
-      const duplicate = departments.some(
-        (dept) => dept.departmentId === form.departmentId
-      );
-
-      if (duplicate) {
-        alert("Department ID already exists");
-        return;
+        setDepartments(updatedDepts);
+        addToRecentSearches(newDept);
       }
-
-      const newDepartment = {
-        ...form,
-        createdAt: new Date().toLocaleString(),
-      };
-
-      const updatedDepartments = [...departments, newDepartment];
-
-      setDepartments(updatedDepartments);
-      localStorage.setItem(
-        "departments",
-        JSON.stringify(updatedDepartments)
-      );
-
-      addToRecentSearches(newDepartment);
+      clearForm();
+    } catch (err) {
+      alert(err.message || "An error occurred while saving the Department");
+      console.error("Error adding Department:", err.message || err);
     }
-
-    clearForm();
-  };
+  }
 
   const handleEdit = (index) => {
     const dept = departments[index];
@@ -134,16 +156,19 @@ export default function Departments() {
     addToRecentSearches(dept);
   };
 
-  const handleDelete = (index) => {
-    const deptToDelete = departments[index];
+  const handleDelete = async (index) => {
+    const DeptToDelete = departments[index];
 
-    const updatedDepartments = departments.filter((_, i) => i !== index);
-    setDepartments(updatedDepartments);
+    const res = await fetch(`${API_BASE}/department/${DeptToDelete.departmentId}`, {
+      method: "DELETE",
+    });
 
-    localStorage.setItem(
-      "departments",
-      JSON.stringify(updatedDepartments)
-    );
+    if (!res.ok) {
+      throw new Error("Failed to delete Deparment");
+    }
+
+    const updatedDepts = departments.filter((_, i) => i !== index);
+    setDepartments(updatedDepts);
 
     const recentSearches =
       JSON.parse(localStorage.getItem("recentSearches")) || [];
@@ -153,7 +178,7 @@ export default function Departments() {
         !(
           item.type === "Department" &&
           item.data &&
-          item.data.departmentId === deptToDelete.departmentId
+          item.data.departmentId === DeptToDelete.departmentId
         )
     );
 
@@ -171,7 +196,13 @@ export default function Departments() {
   const handleView = (index) => {
     const dept = departments[index];
     addToRecentSearches(dept);
-    alert("Added to recent searches");
+    setSelectedDeparment(dept);
+    setIsViewModalOpen(true);
+  };
+
+  const closeViewModal = () => {
+    setIsViewModalOpen(false);
+    setSelectedDeparment(null);
   };
 
   return (
@@ -183,6 +214,32 @@ export default function Departments() {
 
         <main className="flex-1 p-6">
           <div className="bg-white border rounded p-4">
+            {isViewModalOpen && selectedDeparment && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+                <div className="w-full max-w-md rounded-lg bg-white p-5 shadow-xl">
+                  <div className="flex items-center justify-between gap-4 border-b pb-3">
+                    <h2 className="text-lg font-semibold text-black">Department Details</h2>
+                    <button
+                      type="button"
+                      onClick={closeViewModal}
+                      className="rounded px-2 py-1 text-sm text-gray-500 hover:bg-gray-100 hover:text-black"
+                    >
+                      Close
+                    </button>
+                  </div>
+
+                  <div className="mt-4 space-y-3 text-sm text-gray-700">
+                    <div><span className="font-medium text-black">Department ID:</span> {selectedDeparment.departmentId}</div>
+                    <div><span className="font-medium text-black">Department Name:</span> {selectedDeparment.departmentName}</div>
+                    <div><span className="font-medium text-black">Established Date:</span> {selectedDeparment.establishedDate}</div>
+                    <div><span className="font-medium text-black">Department Email:</span> {selectedDeparment.departmentEmail}</div>
+                    <div><span className="font-medium text-black">Location:</span> {selectedDeparment.location}</div>
+                    <div><span className="font-medium text-black">Budget:</span> ₹{selectedDeparment.budget}</div>
+                    <div><span className="font-medium text-black">Created At:</span> {selectedDeparment.createdAt}</div>
+                  </div>
+                </div>
+              </div>
+            )}
             <div className="flex items-center gap-4 mb-4">
               <h1 className="text-2xl font-bold !text-black">
                 Departments
@@ -192,8 +249,8 @@ export default function Departments() {
 
             <p className="text-gray-600 mb-6">
               Add department details below
-              <br/>
-              <br/>
+              <br />
+              <br />
             </p>
 
             <form

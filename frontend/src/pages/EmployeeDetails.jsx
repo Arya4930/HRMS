@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
+import { API_BASE } from "../main";
 
 function parseCsvLine(line) {
   const values = [];
@@ -106,7 +107,7 @@ export default function EmployeeDetails() {
       try {
         setIsLoadingEmployee(true);
 
-        const response = await fetch(`http://localhost:3000/api/employees/${id}`);
+        const response = await fetch(`${API_BASE}/employees/${id}`);
         if (!response.ok) {
           throw new Error("Failed to fetch employee details");
         }
@@ -196,8 +197,8 @@ export default function EmployeeDetails() {
     try {
       const res = await fetch(
         isEditing
-          ? `http://localhost:3000/api/employees/${id}`
-          : "http://localhost:3000/api/employees",
+          ? `${API_BASE}/employees/${id}`
+          : `${API_BASE}/employees`,
         {
         method: isEditing ? "PUT" : "POST",
         headers: {

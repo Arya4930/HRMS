@@ -1,11 +1,12 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
+import { API_BASE } from "../main";
 
 export default function Courses() {
-  const [courses, setCourses] = useState(
-    JSON.parse(localStorage.getItem("courses")) || []
-  );
+  const [courses, setCourses] = useState([]);
+  const [selectedCourse, setSelectedCourse] = useState(null);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
 
   const [form, setForm] = useState({
     courseId: "",
@@ -17,6 +18,24 @@ export default function Courses() {
     instructorName: "",
     cost: "",
   });
+
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/course`);
+        if (!res.ok) {
+          throw new Error("Failed to fetch courses");
+        }
+        const data = await res.json();
+        setCourses(data);
+      } catch (error) {
+        alert(error.message || "An error occurred while fetching the courses");
+        console.error("Error fetching courses:", error);
+      }
+    };
+
+    fetchCourses();
+  }, []);
 
   const [editIndex, setEditIndex] = useState(null);
 
@@ -68,7 +87,7 @@ export default function Courses() {
     );
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     const values = Object.values(form);
@@ -77,34 +96,52 @@ export default function Courses() {
       return;
     }
 
-    if (editIndex !== null) {
-      const updatedCourses = [...courses];
-      const updatedCourse = {
-        ...updatedCourses[editIndex],
-        ...form,
-        createdAt: updatedCourses[editIndex].createdAt,
-      };
+    try {
+      if (editIndex !== null) {
+        const res = await fetch(`${API_BASE}/course/${courses[editIndex].courseId}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(form),
+        });
+        if(!res.ok) {
+          throw new Error("Failed to update course");
+        }
+        const updatedCourses = [...courses];
+        const updatedCourse = {
+          ...updatedCourses[editIndex],
+          ...form,
+          createdAt: updatedCourses[editIndex].createdAt,
+        };
 
-      updatedCourses[editIndex] = updatedCourse;
+        updatedCourses[editIndex] = updatedCourse;
 
-      setCourses(updatedCourses);
-      localStorage.setItem("courses", JSON.stringify(updatedCourses));
-      addToRecentSearches(updatedCourse);
-      setEditIndex(null);
-    } else {
-      const newCourse = {
-        ...form,
-        createdAt: new Date().toLocaleString(),
-      };
+        setCourses(updatedCourses);
+        addToRecentSearches(updatedCourse);
+        setEditIndex(null);
+      } else {
+        const res = await fetch(`${API_BASE}/course`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(form),
+        })
+        if (!res.ok) {
+          throw new Error("Failed to add course");
+        }
+        const newCourse = await res.json();
+        const updatedCourses = [...courses, newCourse];
 
-      const updatedCourses = [...courses, newCourse];
-
-      setCourses(updatedCourses);
-      localStorage.setItem("courses", JSON.stringify(updatedCourses));
-      addToRecentSearches(newCourse);
+        setCourses(updatedCourses);
+        addToRecentSearches(newCourse);
+      }
+      clearForm();
+    } catch (error) {
+      alert(error.message || "An error occurred while saving the course");
+      console.error("Error adding course:", error.message || error);
     }
-
-    clearForm();
   };
 
   const handleEdit = (index) => {
@@ -125,12 +162,19 @@ export default function Courses() {
     addToRecentSearches(course);
   };
 
-  const handleDelete = (index) => {
+  const handleDelete = async (index) => {
     const courseToDelete = courses[index];
+
+    const res = await fetch(`${API_BASE}/course/${courseToDelete.courseId}`, {
+      method: "DELETE",
+    });
+
+    if (!res.ok) {
+      throw new Error("Failed to delete course");
+    }
 
     const updatedCourses = courses.filter((_, i) => i !== index);
     setCourses(updatedCourses);
-    localStorage.setItem("courses", JSON.stringify(updatedCourses));
 
     const recentSearches =
       JSON.parse(localStorage.getItem("recentSearches")) || [];
@@ -158,7 +202,13 @@ export default function Courses() {
   const handleView = (index) => {
     const course = courses[index];
     addToRecentSearches(course);
-    alert("Added to recent searches");
+    setSelectedCourse(course);
+    setIsViewModalOpen(true);
+  };
+
+  const closeViewModal = () => {
+    setIsViewModalOpen(false);
+    setSelectedCourse(null);
   };
 
   return (
@@ -170,6 +220,40 @@ export default function Courses() {
 
         <main className="flex-1 p-6">
           <div className="bg-white border rounded p-4">
+            {isViewModalOpen && selectedCourse && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+                <div className="w-full max-w-md rounded-lg bg-white p-5 shadow-xl">
+                  <div className="flex items-center justify-between gap-4 border-b pb-3">
+                    <h2 className="text-lg font-semibold text-black">Course Details</h2>
+                    <button
+                      type="button"
+                      onClick={closeViewModal}
+                      className="rounded px-2 py-1 text-sm text-gray-500 hover:bg-gray-100 hover:text-black"
+                    >
+                      Close
+                    </button>
+                  </div>
+
+                  <div className="mt-4 space-y-3 text-sm text-gray-700">
+                    <div><span className="font-medium text-black">Course ID:</span> {selectedCourse.courseId}</div>
+                    <div><span className="font-medium text-black">Course Name:</span> {selectedCourse.courseName}</div>
+                    <div><span className="font-medium text-black">Course Code:</span> {selectedCourse.courseCode}</div>
+                    <div><span className="font-medium text-black">Location:</span> {selectedCourse.courseLocation}</div>
+                    <div><span className="font-medium text-black">Duration:</span> {selectedCourse.durationDays} Days</div>
+                    <div><span className="font-medium text-black">Instructor:</span> {selectedCourse.instructorName}</div>
+                    <div><span className="font-medium text-black">Cost:</span> ₹{selectedCourse.cost}</div>
+                    <div>
+                      <span className="font-medium text-black">Details:</span>
+                      <p className="mt-1 whitespace-pre-wrap rounded bg-gray-50 p-3 text-gray-700">
+                        {selectedCourse.courseDetails}
+                      </p>
+                    </div>
+                    <div><span className="font-medium text-black">Created At:</span> {selectedCourse.createdAt}</div>
+                  </div>
+                </div>
+              </div>
+            )}
+
             <div className="flex items-center gap-4 mb-4">
               <h1 className="text-2xl font-bold !text-black">Courses</h1>
               <div className="flex-1 h-px bg-gray-300" />
@@ -177,8 +261,8 @@ export default function Courses() {
 
             <p className="text-gray-600 mb-6">
               Add course details below
-              <br/>
-              <br/>
+              <br />
+              <br />
             </p>
 
             <form
