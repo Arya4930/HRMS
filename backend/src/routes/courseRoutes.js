@@ -20,11 +20,11 @@ router.get("/:id", (req, res) => {
 })
 
 router.post("/", (req, res) => {
-    const { name, code, location, duration, details, instructor, cost } = req.body;
+    const { courseId, courseName, courseCode, courseLocation, durationDays, courseDetails, instructorName, cost } = req.body;
 
     console.log("Received course data:", req.body); // Debugging log
 
-    if(!name || !code || !location || !duration || !details || !instructor || !cost) {
+    if(!courseName || !courseCode || !courseLocation || !durationDays || !courseDetails || !instructorName || !cost) {
         return res.status(400).json({ message: "All fields are required." });
     }
 
@@ -35,11 +35,11 @@ router.post("/", (req, res) => {
 
 router.put("/:id", (req, res) => {
     const { id } = req.params;
-    const { name, code, location, duration, details, instructor, cost } = req.body;
+    const { courseName, courseCode, courseLocation, durationDays, courseDetails, instructorName, cost } = req.body;
 
     console.log("Received course update data:", req.body); // Debugging log
 
-    if(!name || !code || !location || !duration || !details || !instructor || !cost) {
+    if(!courseName || !courseCode || !courseLocation || !durationDays || !courseDetails || !instructorName || !cost) {
         return res.status(400).json({ message: "All fields are required." });
     }
 

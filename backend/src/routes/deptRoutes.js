@@ -20,25 +20,25 @@ router.get("/:id", (req, res) => {
 })
 
 router.post("/", (req, res) => {
-    const { dept_name, established_date, dept_email, location, budget } = req.body;
+    const { departmentId, departmentName, establishedDate, departmentEmail, location, budget } = req.body;
 
     console.log("Received department data:", req.body); // Debugging log
 
-    if(!dept_name || !established_date || !dept_email || !location || !budget) {
+    if(!departmentId || !departmentName || !establishedDate || !departmentEmail || !location || !budget) {
         return res.status(400).json({ message: "All fields are required." });
     }
 
     // Regex for the department name to make sure it doesnt contain any numbers
-    if(/\d/.test(dept_name)) {
+    if(/\d/.test(departmentName)) {
         return res.status(400).json({ message: "Department name should not contain numbers." });
     }
 
     // Regex for validating email format
-    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(dept_email)) {
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(departmentEmail)) {
         return res.status(400).json({ message: "Invalid email format." });
     }
 
-    const eod = new Date(established_date);
+    const eod = new Date(establishedDate);
     if(Number.isNaN(eod.getTime()) || eod > new Date()) {
         return res.status(400).json({ message: "Invalid Established Date format." });
     }
@@ -50,25 +50,25 @@ router.post("/", (req, res) => {
 
 router.put("/:id", (req, res) => {
     const { id } = req.params;
-    const { dept_name, established_date, dept_email, location, budget } = req.body;
+    const { departmentName, establishedDate, departmentEmail, location, budget } = req.body;
 
     console.log("Received department update data:", req.body); // Debugging log
 
-    if(!dept_name || !established_date || !dept_email || !location || !budget) {
+    if(!departmentName || !establishedDate || !departmentEmail || !location || !budget) {
         return res.status(400).json({ message: "All fields are required." });
     }
 
     // Regex for the department name to make sure it doesnt contain any numbers
-    if(/\d/.test(dept_name)) {
+    if(/\d/.test(departmentName)) {
         return res.status(400).json({ message: "Department name should not contain numbers." });
     }
 
     // Regex for validating email format
-    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(dept_email)) {
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(departmentEmail)) {
         return res.status(400).json({ message: "Invalid email format." });
     }
 
-    const eod = new Date(established_date);
+    const eod = new Date(establishedDate);
     if(Number.isNaN(eod.getTime()) || eod > new Date()) {
         return res.status(400).json({ message: "Invalid Established Date format." });
     }
