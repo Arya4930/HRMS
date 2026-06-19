@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
 import { SquarePen } from "lucide-react";
+import { API_BASE } from "../main";
 
 function getEmployeeName(employee) {
   return (

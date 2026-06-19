@@ -2,6 +2,7 @@ import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { API_BASE } from "../main";
 
 export default function EmployeeProfile() {
   const navigate = useNavigate();
