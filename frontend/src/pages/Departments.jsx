@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
+import { API_BASE } from "../main";
 
 export default function Departments() {
   const [departments, setDepartments] = useState([]);
@@ -19,7 +20,7 @@ export default function Departments() {
   useEffect(() => {
     const fetchDeparments = async () => {
       try {
-        const res = await fetch("http://localhost:3000/api/department");
+        const res = await fetch(`${API_BASE}/department`);
         if (!res.ok) {
           throw new Error("Failed to fetch deparments");
         }
@@ -93,7 +94,7 @@ export default function Departments() {
 
     try {
       if (editIndex !== null) {
-        const res = await fetch(`http://localhost:3000/api/department/${departments[editIndex].departmentId}`, {
+        const res = await fetch(`${API_BASE}/department/${departments[editIndex].departmentId}`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
@@ -116,13 +117,13 @@ export default function Departments() {
         addToRecentSearches(updatedDept);
         setEditIndex(null);
       } else {
-        const res = await fetch("http://localhost:3000/api/department", {
+        const res = await fetch(`${API_BASE}/department`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify(form),
-        })
+        });
         if (!res.ok) {
           throw new Error("Failed to add Deparment");
         }
@@ -158,7 +159,7 @@ export default function Departments() {
   const handleDelete = async (index) => {
     const DeptToDelete = departments[index];
 
-    const res = await fetch(`http://localhost:3000/api/department/${DeptToDelete.departmentId}`, {
+    const res = await fetch(`${API_BASE}/department/${DeptToDelete.departmentId}`, {
       method: "DELETE",
     });
 

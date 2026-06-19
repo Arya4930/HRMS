@@ -41,7 +41,7 @@ export default function EmployeeList() {
   useEffect(() => {
     const fetchEmployees = async () => {
       try {
-        const response = await fetch("http://localhost:3000/api/employees");
+        const response = await fetch(`${API_BASE}/employees`);
         if (!response.ok) {
           throw new Error("Failed to fetch employees");
         }

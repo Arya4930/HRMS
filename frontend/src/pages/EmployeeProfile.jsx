@@ -30,7 +30,7 @@ export default function EmployeeProfile() {
       try {
         setIsLoading(true);
 
-        const response = await fetch(`http://localhost:3000/api/employees/${id}`);
+        const response = await fetch(`${API_BASE}/employees/${id}`);
         if (!response.ok) {
           throw new Error("Failed to fetch employee details");
         }
@@ -64,7 +64,7 @@ export default function EmployeeProfile() {
     }
 
     try {
-      const response = await fetch(`http://localhost:3000/api/employees/${employeeId}`, {
+      const response = await fetch(`${API_BASE}/employees/${employeeId}`, {
         method: "DELETE",
       });
 

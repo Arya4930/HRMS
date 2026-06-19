@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
+import { API_BASE } from "../main";
 
 export default function Courses() {
   const [courses, setCourses] = useState([]);
@@ -21,7 +22,7 @@ export default function Courses() {
   useEffect(() => {
     const fetchCourses = async () => {
       try {
-        const res = await fetch("http://localhost:3000/api/course");
+        const res = await fetch(`${API_BASE}/course`);
         if (!res.ok) {
           throw new Error("Failed to fetch courses");
         }
@@ -97,7 +98,7 @@ export default function Courses() {
 
     try {
       if (editIndex !== null) {
-        const res = await fetch(`http://localhost:3000/api/course/${courses[editIndex].courseId}`, {
+        const res = await fetch(`${API_BASE}/course/${courses[editIndex].courseId}`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
@@ -120,7 +121,7 @@ export default function Courses() {
         addToRecentSearches(updatedCourse);
         setEditIndex(null);
       } else {
-        const res = await fetch("http://localhost:3000/api/course", {
+        const res = await fetch(`${API_BASE}/course`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -164,7 +165,7 @@ export default function Courses() {
   const handleDelete = async (index) => {
     const courseToDelete = courses[index];
 
-    const res = await fetch(`http://localhost:3000/api/course/${courseToDelete.courseId}`, {
+    const res = await fetch(`${API_BASE}/course/${courseToDelete.courseId}`, {
       method: "DELETE",
     });
 
