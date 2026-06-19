@@ -28,6 +28,7 @@ export default function Courses() {
         const data = await res.json();
         setCourses(data);
       } catch (error) {
+        alert(error.message || "An error occurred while fetching the courses");
         console.error("Error fetching courses:", error);
       }
     };
@@ -133,7 +134,6 @@ export default function Courses() {
         const updatedCourses = [...courses, newCourse];
 
         setCourses(updatedCourses);
-        localStorage.setItem("courses", JSON.stringify(updatedCourses));
         addToRecentSearches(newCourse);
       }
       clearForm();
