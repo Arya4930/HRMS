@@ -20,6 +20,7 @@ export default function EmployeeProfile() {
   const [employee, setEmployee] = useState(
     selectedEmployee || lastSavedEmployee || null
   );
+  const [newCourseID, setNewCourseID] = useState("");
   const [isLoading, setIsLoading] = useState(Boolean(id));
 
   useEffect(() => {
@@ -102,6 +103,30 @@ export default function EmployeeProfile() {
       alert(error.message || "Error deleting employee");
     }
   };
+
+  const addCourse = () => async (e) => {
+    e.preventDefault();
+
+    try {
+      const res = await fetch(`${API_BASE}/employees/addCourse/${employee.emp_id}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ courseId: newCourseID }),
+      });
+      if(!res.ok) {
+        throw new Error("Failed to add course");
+      }
+      const updatedEmployee = await res.json();
+      setEmployee(updatedEmployee);
+      setNewCourseID("");
+      alert("Course added successfully!");
+    } catch(err) {
+      console.log("Error adding course:", err);
+      alert("Error adding course. Please try again.");
+    }
+  }
 
   if (!employee) {
     return (
@@ -236,6 +261,27 @@ export default function EmployeeProfile() {
               <div className="border rounded p-4 md:col-span-2">
                 <p className="text-sm text-gray-500">Address</p>
                 <p className="font-semibold">{employee?.address || "-"}</p>
+              </div>
+
+              <div className="border rounded p-4 md:col-span-2">
+                <p className="text-sm text-gray-500">Courses</p>
+                {employee?.courses && (
+                  <div>
+                    {employee.courses.map((course) => (
+                      <p key={course.id} className="font-semibold">
+                        {course.courseName}
+                      </p>
+                    ))}
+                  </div>
+                )}
+                <form className="mt-2 flex items-center gap-2" onSubmit={addCourse()} value={newCourseID} onChange={(e) => setNewCourseID(e.target.value)}>
+                  <input type="text" placeholder="Course ID" />
+                  <label htmlFor="addCourse" className="ml-2">
+                    <button type="submit" className="border px-3 py-1 rounded bg-gray-100 hover:bg-gray-200">
+                      Add Course
+                    </button>
+                  </label>
+                </form>
               </div>
             </div>
 

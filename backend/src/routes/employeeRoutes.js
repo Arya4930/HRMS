@@ -105,4 +105,19 @@ router.delete("/:id", (req, res) => {
     res.status(200).json({ message: "Employee deleted successfully!" });
 });
 
+router.post("/addCourse/:id", (req, res) => {
+    const { id } = req.params;
+    const { course_id } = req.body;
+
+    console.log(`Adding course ${course_id} to employee ${id}`); // Debugging log
+
+    if(!course_id) {
+        return res.status(400).json({ message: "Course ID is required." });
+    }
+
+    // Logic to add a course to an employee in the database will go here
+
+    res.status(200).json({ message: "Course added to employee successfully!" });
+});
+
 export default router;
