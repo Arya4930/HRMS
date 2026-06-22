@@ -40,6 +40,13 @@ export default function Sidebar() {
         >
           Courses
         </Link>
+
+        <Link
+          to="/register-admin"
+          className="block border rounded p-2 hover:bg-gray-100 text-black"
+        >
+          Register New Admin
+        </Link>
       </div>
     </aside>
   );

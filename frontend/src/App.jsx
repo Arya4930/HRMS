@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import EmployeeDetails from "./pages/EmployeeDetails";
@@ -6,10 +7,47 @@ import EmployeeList from "./pages/EmployeeList";
 import EmployeeProfile from "./pages/EmployeeProfile";
 import Departments from "./pages/Departments";
 import Courses from "./pages/Courses";
+import RegisterAdmin from "./pages/RegisterAdmin";
+import { API_BASE } from "./api";
 
 function ProtectedRoute({ children }) {
-  const loggedIn = localStorage.getItem("loggedIn") === "true";
-  return loggedIn ? children : <Navigate to="/" replace />;
+  const authToken = localStorage.getItem("authToken");
+  const [isAllowed, setIsAllowed] = useState(null);
+
+  useEffect(() => {
+    if (!authToken) {
+      setIsAllowed(false);
+      return;
+    }
+
+    const verifyLogin = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/me`, {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+        });
+
+        if (!res.ok) {
+          throw new Error("Session expired");
+        }
+
+        setIsAllowed(true);
+      } catch {
+        localStorage.removeItem("authToken");
+        localStorage.removeItem("user");
+        setIsAllowed(false);
+      }
+    };
+
+    verifyLogin();
+  }, [authToken]);
+
+  if (isAllowed === null) {
+    return null;
+  }
+
+  return isAllowed ? children : <Navigate to="/" replace />;
 }
 
 export default function App() {
@@ -86,6 +124,15 @@ export default function App() {
           element={
             <ProtectedRoute>
               <Courses />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/register-admin"
+          element={
+            <ProtectedRoute>
+              <RegisterAdmin />
             </ProtectedRoute>
           }
         />

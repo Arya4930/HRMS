@@ -8,6 +8,14 @@ CREATE TABLE departments (
     createdat TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE users (
+    userid VARCHAR(20) PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(120) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 CREATE TABLE employees (
     emp_id VARCHAR(20) PRIMARY KEY,
     first_name VARCHAR(50) NOT NULL,

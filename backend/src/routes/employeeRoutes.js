@@ -1,7 +1,6 @@
 import express from "express";
 import "dotenv/config";
 import pg from "pg";
-
 import { Pool } from "pg";
 
 const pool = new Pool({

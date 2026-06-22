@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
 import { SquarePen } from "lucide-react";
-import { API_BASE } from "../main";
+import { API_BASE } from "../api";
 
 function getEmployeeName(employee) {
   return (
@@ -98,6 +98,13 @@ export default function EmployeeList() {
     navigate(`/edit-employee/${employee.emp_id}`);
   };
 
+  const handleViewEmployee = (employee) => {
+    localStorage.setItem("selectedEmployee", JSON.stringify(employee));
+    navigate(`/employee-profile/${employee.emp_id}`, {
+      state: { employee },
+    });
+  };
+
   return (
     <div className="h-screen overflow-hidden bg-gray-100 text-black flex flex-col">
       <Navbar />
@@ -166,14 +173,18 @@ export default function EmployeeList() {
                     </tr>
                   ) : (
                     filteredEmployees.map((employee, index) => (
-                      <tr key={index}>
+                      <tr
+                        key={index}
+                        className="cursor-pointer hover:bg-gray-50"
+                        onClick={() => handleViewEmployee(employee)}
+                      >
                         <td className="border p-2">{employee.emp_id}</td>
                         <td className="border p-2">{employee.first_name || "-"}</td>
                         <td className="border p-2">{employee.last_name || "-"}</td>
                         <td className="border p-2">{employee.email}</td>
                         <td className="border p-2">{employee.phone || "-"}</td>
-                        <td className="border p-2">{employee.date_of_birth || "-"}</td>
-                        <td className="border p-2">{employee.hire_date || "-"}</td>
+                        <td className="border p-2">{new Date(employee.date_of_birth || "-").toLocaleDateString() || "-"}</td>
+                        <td className="border p-2">{new Date(employee.hire_date || "-").toLocaleDateString() || "-"}</td>
                         <td className="border p-2">{employee.job_title || "-"}</td>
                         <td className="border p-2">{employee.department_id || "-"}</td>
                         <td className="border p-2">{employee.status || "-"}</td>
@@ -181,7 +192,10 @@ export default function EmployeeList() {
                         <td className="border p-2">{employee.address || "-"}</td>
                         <td className="border p-2">
                           <button
-                            onClick={() => handleEditEmployee(employee)}
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              handleEditEmployee(employee);
+                            }}
                             className="border px-3 py-1 rounded bg-gray-100 hover:bg-gray-200"
                           >
                             <SquarePen className="w-4 h-4" />

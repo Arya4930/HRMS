@@ -10,9 +10,22 @@ export default function Dashboard() {
 
   const openEmployee = (employee) => {
     localStorage.setItem("selectedEmployee", JSON.stringify(employee));
-    const employeeId = employee.emp_id || employee.employeeId;
-    navigate(employeeId ? `/employee-profile/${employeeId}` : "/employee-profile");
+    const employeeid = employee.emp_id || employee.employeeid;
+    navigate(employeeid ? `/employee-profile/${employeeid}` : "/employee-profile");
   };
+
+  const getRecentId = (item) =>
+    item.emp_id || item.employeeid || item.data?.departmentid || item.data?.courseid || "-";
+
+  const getRecentName = (item) =>
+    item.name ||
+    [item.first_name, item.last_name].filter(Boolean).join(" ") ||
+    item.data?.departmentname ||
+    item.data?.coursename ||
+    "-";
+
+  const getRecentDepartment = (item) =>
+    item.department || item.department_id || item.data?.departmentid || "-";
 
   return (
     <div className="min-h-screen bg-gray-100 text-black">
@@ -47,9 +60,9 @@ export default function Dashboard() {
                   <tbody>
                     {recentSearches.map((employee, index) => (
                       <tr key={index}>
-                        <td className="border p-2">{employee.employeeId}</td>
-                        <td className="border p-2">{employee.name}</td>
-                        <td className="border p-2">{employee.department}</td>
+                        <td className="border p-2">{getRecentId(employee)}</td>
+                        <td className="border p-2">{getRecentName(employee)}</td>
+                        <td className="border p-2">{getRecentDepartment(employee)}</td>
                         <td className="border p-2">
                           <button
                             onClick={() => openEmployee(employee)}
