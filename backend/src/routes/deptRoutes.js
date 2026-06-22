@@ -1,6 +1,13 @@
 import express from "express";
 import "dotenv/config";
 import { Pool } from "pg";
+const pool = new Pool({
+  host: "localhost",
+  port: 5432,
+  user: "postgres",
+  password: "password",
+  database: "hrms",
+});
 
 const router = express.Router();
 

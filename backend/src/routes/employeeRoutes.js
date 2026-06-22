@@ -3,6 +3,14 @@ import "dotenv/config";
 import pg from "pg";
 import { Pool } from "pg";
 
+const pool = new Pool({
+  host: "localhost",
+  port: 5432,
+  user: "postgres",
+  password: "password",
+  database: "hrms",
+});
+
 const router = express.Router();
 
 async function getEmployeeWithCourses(employeeid) {
