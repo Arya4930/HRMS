@@ -2,8 +2,15 @@ import express from "express";
 import "dotenv/config";
 import pg from "pg";
 
-const { Pool } = pg;
-const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+import { Pool } from "pg";
+
+const pool = new Pool({
+  host: "localhost",
+  port: 5432,
+  user: "postgres",
+  password: "password",
+  database: "hrms",
+});
 
 const router = express.Router();
 
@@ -15,7 +22,7 @@ router.get("/", async (req, res) => {
 
     try {
         const result = await pool.query(
-            "SELECT * FROM courses ORDER BY course_id LIMIT $1 OFFSET $2",
+            "SELECT * FROM courses ORDER BY courseid LIMIT $1 OFFSET $2",
             [limit, offset]
         );
         res.status(200).json(result.rows);
@@ -31,7 +38,7 @@ router.get("/:id", async (req, res) => {
 
     try {
         const result = await pool.query(
-            "SELECT * FROM courses WHERE course_id = $1",
+            "SELECT * FROM courses WHERE courseid = $1",
             [id]
         );
 
@@ -47,19 +54,19 @@ router.get("/:id", async (req, res) => {
 })
 
 router.post("/", async (req, res) => {
-    const { courseId, courseName, courseCode, courseLocation, durationDays, courseDetails, instructorName, cost } = req.body;
+    const { courseid, coursename, coursecode, courselocation, durationdays, coursedetails, instructorname, cost } = req.body;
 
     console.log("Received course data:", req.body); // Debugging log
 
-    if(!courseName || !courseCode || !courseLocation || !durationDays || !courseDetails || !instructorName || !cost) {
+    if(!courseid || !coursename || !coursecode || !courselocation || !durationdays || !coursedetails || !instructorname || !cost) {
         return res.status(400).json({ message: "All fields are required." });
     }
 
     try {
         const result = await pool.query(
-            `INSERT INTO courses (course_name, course_code, course_location, duration_days, course_details, instructor_name, cost)
-             VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
-            [courseName, courseCode, courseLocation, durationDays, courseDetails, instructorName, cost]
+            `INSERT INTO courses (courseid, coursename, coursecode, courselocation, durationdays, coursedetails, instructorname, cost)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
+            [courseid, coursename, coursecode, courselocation, durationdays, coursedetails, instructorname, cost]
         );
 
         res.status(201).json({ message: "Course added successfully!", course: result.rows[0] });
@@ -71,21 +78,21 @@ router.post("/", async (req, res) => {
 
 router.put("/:id", async (req, res) => {
     const { id } = req.params;
-    const { courseName, courseCode, courseLocation, durationDays, courseDetails, instructorName, cost } = req.body;
+    const { coursename, coursecode, courselocation, durationdays, coursedetails, instructorname, cost } = req.body;
 
     console.log("Received course update data:", req.body); // Debugging log
 
-    if(!courseName || !courseCode || !courseLocation || !durationDays || !courseDetails || !instructorName || !cost) {
+    if(!coursename || !coursecode || !courselocation || !durationdays || !coursedetails || !instructorname || !cost) {
         return res.status(400).json({ message: "All fields are required." });
     }
 
     try {
         const result = await pool.query(
             `UPDATE courses
-             SET course_name = $1, course_code = $2, course_location = $3,
-                 duration_days = $4, course_details = $5, instructor_name = $6, cost = $7
-             WHERE course_id = $8 RETURNING *`,
-            [courseName, courseCode, courseLocation, durationDays, courseDetails, instructorName, cost, id]
+             SET coursename = $1, coursecode = $2, courselocation = $3,
+                 durationdays = $4, coursedetails = $5, instructorname = $6, cost = $7
+             WHERE courseid = $8 RETURNING *`,
+            [coursename, coursecode, courselocation, durationdays, coursedetails, instructorname, cost, id]
         );
 
         if (result.rows.length === 0) {
@@ -105,7 +112,7 @@ router.delete("/:id", async (req, res) => {
 
     try {
         const result = await pool.query(
-            "DELETE FROM courses WHERE course_id = $1 RETURNING *",
+            "DELETE FROM courses WHERE courseid = $1 RETURNING *",
             [id]
         );
 
