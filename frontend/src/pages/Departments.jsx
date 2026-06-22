@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
-import { API_BASE } from "../main";
+import { API_BASE } from "../api";
 
 export default function Departments() {
   const [departments, setDepartments] = useState([]);
@@ -9,10 +9,10 @@ export default function Departments() {
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
 
   const [form, setForm] = useState({
-    departmentId: "",
-    departmentName: "",
-    establishedDate: "",
-    departmentEmail: "",
+    departmentid: "",
+    departmentname: "",
+    establisheddate: "",
+    departmentemail: "",
     location: "",
     budget: "",
   });
@@ -25,6 +25,7 @@ export default function Departments() {
           throw new Error("Failed to fetch deparments");
         }
         const data = await res.json();
+        console.log(data);
         setDepartments(data);
 
       } catch (err) {
@@ -34,7 +35,7 @@ export default function Departments() {
     }
 
     fetchDeparments();
-  })
+  }, [])
 
   const [editIndex, setEditIndex] = useState(null);
 
@@ -47,10 +48,10 @@ export default function Departments() {
 
   const clearForm = () => {
     setForm({
-      departmentId: "",
-      departmentName: "",
-      establishedDate: "",
-      departmentEmail: "",
+      departmentid: "",
+      departmentname: "",
+      establisheddate: "",
+      departmentemail: "",
       location: "",
       budget: "",
     });
@@ -63,7 +64,7 @@ export default function Departments() {
     const updatedRecentSearches = [
       {
         type: "Department",
-        name: dept.departmentName,
+        name: dept.departmentname,
         searchedAt: new Date().toLocaleString(),
         data: dept,
       },
@@ -72,7 +73,7 @@ export default function Departments() {
           !(
             item.type === "Department" &&
             item.data &&
-            item.data.departmentId === dept.departmentId
+            item.data.departmentid === dept.departmentid
           )
       ),
     ].slice(0, 10);
@@ -94,7 +95,7 @@ export default function Departments() {
 
     try {
       if (editIndex !== null) {
-        const res = await fetch(`${API_BASE}/department/${departments[editIndex].departmentId}`, {
+        const res = await fetch(`${API_BASE}/department/${departments[editIndex].departmentid}`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
@@ -108,7 +109,7 @@ export default function Departments() {
         const updatedDept = {
           ...updatedDepts[editIndex],
           ...form,
-          createdAt: updatedDepts[editIndex].createdAt,
+          createdat: updatedDepts[editIndex].createdat,
         };
 
         updatedDepts[editIndex] = updatedDept;
@@ -127,7 +128,8 @@ export default function Departments() {
         if (!res.ok) {
           throw new Error("Failed to add Deparment");
         }
-        const newDept = await res.json();
+        const createdDept = await res.json();
+        const newDept = createdDept.department || createdDept;
         const updatedDepts = [...departments, newDept];
 
         setDepartments(updatedDepts);
@@ -144,10 +146,10 @@ export default function Departments() {
     const dept = departments[index];
 
     setForm({
-      departmentId: dept.departmentId,
-      departmentName: dept.departmentName,
-      establishedDate: dept.establishedDate,
-      departmentEmail: dept.departmentEmail,
+      departmentid: dept.departmentid,
+      departmentname: dept.departmentname,
+      establisheddate: dept.establisheddate,
+      departmentemail: dept.departmentemail,
       location: dept.location,
       budget: dept.budget,
     });
@@ -159,7 +161,7 @@ export default function Departments() {
   const handleDelete = async (index) => {
     const DeptToDelete = departments[index];
 
-    const res = await fetch(`${API_BASE}/department/${DeptToDelete.departmentId}`, {
+    const res = await fetch(`${API_BASE}/department/${DeptToDelete.departmentid}`, {
       method: "DELETE",
     });
 
@@ -178,7 +180,7 @@ export default function Departments() {
         !(
           item.type === "Department" &&
           item.data &&
-          item.data.departmentId === DeptToDelete.departmentId
+          item.data.departmentid === DeptToDelete.departmentid
         )
     );
 
@@ -218,7 +220,7 @@ export default function Departments() {
               <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
                 <div className="w-full max-w-md rounded-lg bg-white p-5 shadow-xl">
                   <div className="flex items-center justify-between gap-4 border-b pb-3">
-                    <h2 className="text-lg font-semibold text-black">Department Details</h2>
+                    <h2 className="text-lg font-semibold !text-black">Department Details</h2>
                     <button
                       type="button"
                       onClick={closeViewModal}
@@ -229,13 +231,13 @@ export default function Departments() {
                   </div>
 
                   <div className="mt-4 space-y-3 text-sm text-gray-700">
-                    <div><span className="font-medium text-black">Department ID:</span> {selectedDeparment.departmentId}</div>
-                    <div><span className="font-medium text-black">Department Name:</span> {selectedDeparment.departmentName}</div>
-                    <div><span className="font-medium text-black">Established Date:</span> {selectedDeparment.establishedDate}</div>
-                    <div><span className="font-medium text-black">Department Email:</span> {selectedDeparment.departmentEmail}</div>
+                    <div><span className="font-medium text-black">Department ID:</span> {selectedDeparment.departmentid}</div>
+                    <div><span className="font-medium text-black">Department Name:</span> {selectedDeparment.departmentname}</div>
+                    <div><span className="font-medium text-black">Established Date:</span> {new Date(selectedDeparment.establisheddate).toLocaleDateString()}</div>
+                    <div><span className="font-medium text-black">Department Email:</span> {selectedDeparment.departmentemail}</div>
                     <div><span className="font-medium text-black">Location:</span> {selectedDeparment.location}</div>
                     <div><span className="font-medium text-black">Budget:</span> ₹{selectedDeparment.budget}</div>
-                    <div><span className="font-medium text-black">Created At:</span> {selectedDeparment.createdAt}</div>
+                    <div><span className="font-medium text-black">Created At:</span> {selectedDeparment.createdat}</div>
                   </div>
                 </div>
               </div>
@@ -259,18 +261,18 @@ export default function Departments() {
             >
               <input
                 type="text"
-                name="departmentId"
+                name="departmentid"
                 placeholder="Department ID"
-                value={form.departmentId}
+                value={form.departmentid}
                 onChange={handleChange}
                 className="border rounded px-3 py-2 bg-white"
               />
 
               <input
                 type="text"
-                name="departmentName"
+                name="departmentname"
                 placeholder="Department Name"
-                value={form.departmentName}
+                value={form.departmentname}
                 onChange={handleChange}
                 className="border rounded px-3 py-2 bg-white"
               />
@@ -281,8 +283,8 @@ export default function Departments() {
                 </label>
                 <input
                   type="date"
-                  name="establishedDate"
-                  value={form.establishedDate}
+                  name="establisheddate"
+                  value={form.establisheddate}
                   onChange={handleChange}
                   className="border rounded px-3 py-2 bg-white w-full"
                 />
@@ -290,9 +292,9 @@ export default function Departments() {
 
               <input
                 type="email"
-                name="departmentEmail"
+                name="departmentemail"
                 placeholder="Department Email"
-                value={form.departmentEmail}
+                value={form.departmentemail}
                 onChange={handleChange}
                 className="border rounded px-3 py-2 bg-white"
               />
@@ -352,15 +354,15 @@ export default function Departments() {
                   ) : (
                     departments.map((dept, index) => (
                       <tr key={index}>
-                        <td className="border p-2">{dept.departmentId}</td>
-                        <td className="border p-2">{dept.departmentName}</td>
+                        <td className="border p-2">{dept.departmentid}</td>
+                        <td className="border p-2">{dept.departmentname}</td>
                         <td className="border p-2">
-                          {dept.establishedDate}
+                          {new Date(dept.establisheddate).toLocaleDateString()}
                         </td>
-                        <td className="border p-2">{dept.departmentEmail}</td>
+                        <td className="border p-2">{dept.departmentemail}</td>
                         <td className="border p-2">{dept.location}</td>
                         <td className="border p-2">₹{dept.budget}</td>
-                        <td className="border p-2">{dept.createdAt}</td>
+                        <td className="border p-2">{new Date(dept.createdat).toLocaleDateString()}</td>
                         <td className="border p-2">
                           <div className="flex gap-2">
                             <button

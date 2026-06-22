@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { API_BASE } from "../api";
 
 export default function Login() {
   const navigate = useNavigate();
 
   const [form, setForm] = useState({
-    username: "",
+    email: "",
     password: "",
   });
 
@@ -16,16 +17,34 @@ export default function Login() {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!form.username.trim() || !form.password.trim()) {
-      alert("Please enter username and password");
+    if (!form.email.trim() || !form.password.trim()) {
+      alert("Please enter email and password");
       return;
     }
 
-    localStorage.setItem("loggedIn", "true");
-    navigate("/dashboard");
+    try {
+      const res = await fetch(`${API_BASE}/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(form),
+      });
+
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(data.message || "Unable to login");
+      }
+
+      localStorage.setItem("authToken", data.data.accessToken);
+      localStorage.setItem("user", JSON.stringify(data.data.user));
+      navigate("/dashboard");
+    } catch (error) {
+      alert(error.message || "Unable to login");
+    }
   };
 
   return (
@@ -38,13 +57,13 @@ export default function Login() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block mb-2 text-sm font-medium text-black">
-              Username
+              Email
             </label>
             <input
-              type="text"
-              name="username"
-              placeholder="Enter Username"
-              value={form.username}
+              type="email"
+              name="email"
+              placeholder="Enter Email"
+              value={form.email}
               onChange={handleChange}
               className="w-full border rounded px-3 py-2 bg-white text-black"
             />

@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
-import { API_BASE } from "../main";
+import { API_BASE } from "../api";
 
 function parseCsvLine(line) {
   const values = [];

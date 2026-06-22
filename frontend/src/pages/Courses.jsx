@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
-import { API_BASE } from "../main";
+import { API_BASE } from "../api";
 
 export default function Courses() {
   const [courses, setCourses] = useState([]);
@@ -9,13 +9,13 @@ export default function Courses() {
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
 
   const [form, setForm] = useState({
-    courseId: "",
-    courseName: "",
-    courseCode: "",
-    courseLocation: "",
-    durationDays: "",
-    courseDetails: "",
-    instructorName: "",
+    courseid: "",
+    coursename: "",
+    coursecode: "",
+    courselocation: "",
+    durationdays: "",
+    coursedetails: "",
+    instructorname: "",
     cost: "",
   });
 
@@ -48,13 +48,13 @@ export default function Courses() {
 
   const clearForm = () => {
     setForm({
-      courseId: "",
-      courseName: "",
-      courseCode: "",
-      courseLocation: "",
-      durationDays: "",
-      courseDetails: "",
-      instructorName: "",
+      courseid: "",
+      coursename: "",
+      coursecode: "",
+      courselocation: "",
+      durationdays: "",
+      coursedetails: "",
+      instructorname: "",
       cost: "",
     });
   };
@@ -66,8 +66,8 @@ export default function Courses() {
     const updatedRecentSearches = [
       {
         type: "Course",
-        name: course.courseName,
-        code: course.courseCode,
+        name: course.coursename,
+        code: course.coursecode,
         searchedAt: new Date().toLocaleString(),
         data: course,
       },
@@ -76,7 +76,7 @@ export default function Courses() {
           !(
             item.type === "Course" &&
             item.data &&
-            item.data.courseId === course.courseId
+            item.data.courseid === course.courseid
           )
       ),
     ].slice(0, 10);
@@ -98,7 +98,7 @@ export default function Courses() {
 
     try {
       if (editIndex !== null) {
-        const res = await fetch(`${API_BASE}/course/${courses[editIndex].courseId}`, {
+        const res = await fetch(`${API_BASE}/course/${courses[editIndex].courseid}`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
@@ -112,7 +112,7 @@ export default function Courses() {
         const updatedCourse = {
           ...updatedCourses[editIndex],
           ...form,
-          createdAt: updatedCourses[editIndex].createdAt,
+          createdat: updatedCourses[editIndex].createdat,
         };
 
         updatedCourses[editIndex] = updatedCourse;
@@ -131,7 +131,8 @@ export default function Courses() {
         if (!res.ok) {
           throw new Error("Failed to add course");
         }
-        const newCourse = await res.json();
+        const createdCourse = await res.json();
+        const newCourse = createdCourse.course || createdCourse;
         const updatedCourses = [...courses, newCourse];
 
         setCourses(updatedCourses);
@@ -148,13 +149,13 @@ export default function Courses() {
     const course = courses[index];
 
     setForm({
-      courseId: course.courseId,
-      courseName: course.courseName,
-      courseCode: course.courseCode,
-      courseLocation: course.courseLocation,
-      durationDays: course.durationDays,
-      courseDetails: course.courseDetails,
-      instructorName: course.instructorName,
+      courseid: course.courseid,
+      coursename: course.coursename,
+      coursecode: course.coursecode,
+      courselocation: course.courselocation,
+      durationdays: course.durationdays,
+      coursedetails: course.coursedetails,
+      instructorname: course.instructorname,
       cost: course.cost,
     });
 
@@ -165,7 +166,7 @@ export default function Courses() {
   const handleDelete = async (index) => {
     const courseToDelete = courses[index];
 
-    const res = await fetch(`${API_BASE}/course/${courseToDelete.courseId}`, {
+    const res = await fetch(`${API_BASE}/course/${courseToDelete.courseid}`, {
       method: "DELETE",
     });
 
@@ -184,7 +185,7 @@ export default function Courses() {
         !(
           item.type === "Course" &&
           item.data &&
-          item.data.courseId === courseToDelete.courseId
+          item.data.courseid === courseToDelete.courseid
         )
     );
 
@@ -224,7 +225,7 @@ export default function Courses() {
               <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
                 <div className="w-full max-w-md rounded-lg bg-white p-5 shadow-xl">
                   <div className="flex items-center justify-between gap-4 border-b pb-3">
-                    <h2 className="text-lg font-semibold text-black">Course Details</h2>
+                    <h2 className="text-lg font-semibold !text-black">Course Details</h2>
                     <button
                       type="button"
                       onClick={closeViewModal}
@@ -235,20 +236,20 @@ export default function Courses() {
                   </div>
 
                   <div className="mt-4 space-y-3 text-sm text-gray-700">
-                    <div><span className="font-medium text-black">Course ID:</span> {selectedCourse.courseId}</div>
-                    <div><span className="font-medium text-black">Course Name:</span> {selectedCourse.courseName}</div>
-                    <div><span className="font-medium text-black">Course Code:</span> {selectedCourse.courseCode}</div>
-                    <div><span className="font-medium text-black">Location:</span> {selectedCourse.courseLocation}</div>
-                    <div><span className="font-medium text-black">Duration:</span> {selectedCourse.durationDays} Days</div>
-                    <div><span className="font-medium text-black">Instructor:</span> {selectedCourse.instructorName}</div>
+                    <div><span className="font-medium text-black">Course ID:</span> {selectedCourse.courseid}</div>
+                    <div><span className="font-medium text-black">Course Name:</span> {selectedCourse.coursename}</div>
+                    <div><span className="font-medium text-black">Course Code:</span> {selectedCourse.coursecode}</div>
+                    <div><span className="font-medium text-black">Location:</span> {selectedCourse.courselocation}</div>
+                    <div><span className="font-medium text-black">Duration:</span> {selectedCourse.durationdays} Days</div>
+                    <div><span className="font-medium text-black">Instructor:</span> {selectedCourse.instructorname}</div>
                     <div><span className="font-medium text-black">Cost:</span> ₹{selectedCourse.cost}</div>
                     <div>
                       <span className="font-medium text-black">Details:</span>
                       <p className="mt-1 whitespace-pre-wrap rounded bg-gray-50 p-3 text-gray-700">
-                        {selectedCourse.courseDetails}
+                        {selectedCourse.coursedetails}
                       </p>
                     </div>
-                    <div><span className="font-medium text-black">Created At:</span> {selectedCourse.createdAt}</div>
+                    <div><span className="font-medium text-black">Created At:</span> {selectedCourse.createdat}</div>
                   </div>
                 </div>
               </div>
@@ -271,54 +272,54 @@ export default function Courses() {
             >
               <input
                 type="text"
-                name="courseId"
+                name="courseid"
                 placeholder="Course ID"
-                value={form.courseId}
+                value={form.courseid}
                 onChange={handleChange}
                 className="border rounded px-3 py-2 bg-white"
               />
 
               <input
                 type="text"
-                name="courseName"
+                name="coursename"
                 placeholder="Course Name"
-                value={form.courseName}
+                value={form.coursename}
                 onChange={handleChange}
                 className="border rounded px-3 py-2 bg-white"
               />
 
               <input
                 type="text"
-                name="courseCode"
+                name="coursecode"
                 placeholder="Course Code"
-                value={form.courseCode}
+                value={form.coursecode}
                 onChange={handleChange}
                 className="border rounded px-3 py-2 bg-white"
               />
 
               <input
                 type="text"
-                name="courseLocation"
+                name="courselocation"
                 placeholder="Course Location"
-                value={form.courseLocation}
+                value={form.courselocation}
                 onChange={handleChange}
                 className="border rounded px-3 py-2 bg-white"
               />
 
               <input
                 type="number"
-                name="durationDays"
+                name="durationdays"
                 placeholder="Duration (Days)"
-                value={form.durationDays}
+                value={form.durationdays}
                 onChange={handleChange}
                 className="border rounded px-3 py-2 bg-white"
               />
 
               <input
                 type="text"
-                name="instructorName"
+                name="instructorname"
                 placeholder="Instructor Name"
-                value={form.instructorName}
+                value={form.instructorname}
                 onChange={handleChange}
                 className="border rounded px-3 py-2 bg-white"
               />
@@ -333,9 +334,9 @@ export default function Courses() {
               />
 
               <textarea
-                name="courseDetails"
+                name="coursedetails"
                 placeholder="Course Details"
-                value={form.courseDetails}
+                value={form.coursedetails}
                 onChange={handleChange}
                 className="border rounded px-3 py-2 md:col-span-2 bg-white"
                 rows="4"
@@ -378,15 +379,15 @@ export default function Courses() {
                   ) : (
                     courses.map((course, index) => (
                       <tr key={index}>
-                        <td className="border p-2">{course.courseId}</td>
-                        <td className="border p-2">{course.courseName}</td>
-                        <td className="border p-2">{course.courseCode}</td>
-                        <td className="border p-2">{course.courseLocation}</td>
-                        <td className="border p-2">{course.durationDays} Days</td>
-                        <td className="border p-2">{course.courseDetails}</td>
-                        <td className="border p-2">{course.instructorName}</td>
+                        <td className="border p-2">{course.courseid}</td>
+                        <td className="border p-2">{course.coursename}</td>
+                        <td className="border p-2">{course.coursecode}</td>
+                        <td className="border p-2">{course.courselocation}</td>
+                        <td className="border p-2">{course.durationdays} Days</td>
+                        <td className="border p-2">{course.coursedetails}</td>
+                        <td className="border p-2">{course.instructorname}</td>
                         <td className="border p-2">₹{course.cost}</td>
-                        <td className="border p-2">{course.createdAt}</td>
+                        <td className="border p-2">{course.created_at}</td>
                         <td className="border p-2">
                           <div className="flex gap-2">
                             <button
