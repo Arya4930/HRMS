@@ -2,8 +2,15 @@ import express from "express";
 import "dotenv/config";
 import pg from "pg";
 
-const { Pool } = pg;
-const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+import { Pool } from "pg";
+
+const pool = new Pool({
+  host: "localhost",
+  port: 5432,
+  user: "postgres",
+  password: "password",
+  database: "hrms",
+});
 
 const router = express.Router();
 
@@ -15,7 +22,7 @@ router.get("/", async (req, res) => {
 
     try {
         const result = await pool.query(
-            "SELECT * FROM departments ORDER BY department_id LIMIT $1 OFFSET $2",
+            "SELECT * FROM departments ORDER BY departmentid LIMIT $1 OFFSET $2",
             [limit, offset]
         );
         res.status(200).json(result.rows);
@@ -31,7 +38,7 @@ router.get("/:id", async (req, res) => {
 
     try {
         const result = await pool.query(
-            "SELECT * FROM departments WHERE department_id = $1",
+            "SELECT * FROM departments WHERE departmentid = $1",
             [id]
         );
 
@@ -47,34 +54,34 @@ router.get("/:id", async (req, res) => {
 })
 
 router.post("/", async (req, res) => {
-    const { departmentId, departmentName, establishedDate, departmentEmail, location, budget } = req.body;
+    const { departmentid, departmentname, establisheddate, departmentemail, location, budget } = req.body;
 
     console.log("Received department data:", req.body); // Debugging log
 
-    if(!departmentId || !departmentName || !establishedDate || !departmentEmail || !location || !budget) {
+    if(!departmentid || !departmentname || !establisheddate || !departmentemail || !location || !budget) {
         return res.status(400).json({ message: "All fields are required." });
     }
 
     // Regex for the department name to make sure it doesnt contain any numbers
-    if(/\d/.test(departmentName)) {
+    if(/\d/.test(departmentname)) {
         return res.status(400).json({ message: "Department name should not contain numbers." });
     }
 
     // Regex for validating email format
-    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(departmentEmail)) {
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(departmentemail)) {
         return res.status(400).json({ message: "Invalid email format." });
     }
 
-    const eod = new Date(establishedDate);
+    const eod = new Date(establisheddate);
     if(Number.isNaN(eod.getTime()) || eod > new Date()) {
         return res.status(400).json({ message: "Invalid Established Date format." });
     }
 
     try {
         const result = await pool.query(
-            `INSERT INTO departments (department_name, established_date, department_email, location, budget)
-             VALUES ($1, $2, $3, $4, $5) RETURNING *`,
-            [departmentName, establishedDate, departmentEmail, location, budget]
+            `INSERT INTO departments (departmentid, departmentname, establisheddate, departmentemail, location, budget)
+             VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+            [departmentid, departmentname, establisheddate, departmentemail, location, budget]
         );
 
         res.status(201).json({ message: "Department added successfully!", department: result.rows[0] });
@@ -86,25 +93,25 @@ router.post("/", async (req, res) => {
 
 router.put("/:id", async (req, res) => {
     const { id } = req.params;
-    const { departmentName, establishedDate, departmentEmail, location, budget } = req.body;
+    const { departmentname, establisheddate, departmentemail, location, budget } = req.body;
 
     console.log("Received department update data:", req.body); // Debugging log
 
-    if(!departmentName || !establishedDate || !departmentEmail || !location || !budget) {
+    if(!departmentname || !establisheddate || !departmentemail || !location || !budget) {
         return res.status(400).json({ message: "All fields are required." });
     }
 
     // Regex for the department name to make sure it doesnt contain any numbers
-    if(/\d/.test(departmentName)) {
+    if(/\d/.test(departmentname)) {
         return res.status(400).json({ message: "Department name should not contain numbers." });
     }
 
     // Regex for validating email format
-    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(departmentEmail)) {
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(departmentemail)) {
         return res.status(400).json({ message: "Invalid email format." });
     }
 
-    const eod = new Date(establishedDate);
+    const eod = new Date(establisheddate);
     if(Number.isNaN(eod.getTime()) || eod > new Date()) {
         return res.status(400).json({ message: "Invalid Established Date format." });
     }
@@ -112,9 +119,9 @@ router.put("/:id", async (req, res) => {
     try {
         const result = await pool.query(
             `UPDATE departments
-             SET department_name = $1, established_date = $2, department_email = $3, location = $4, budget = $5
-             WHERE department_id = $6 RETURNING *`,
-            [departmentName, establishedDate, departmentEmail, location, budget, id]
+             SET departmentname = $1, establisheddate = $2, departmentemail = $3, location = $4, budget = $5
+             WHERE departmentid = $6 RETURNING *`,
+            [departmentname, establisheddate, departmentemail, location, budget, id]
         );
 
         if (result.rows.length === 0) {
@@ -134,7 +141,7 @@ router.delete("/:id", async (req, res) => {
 
     try {
         const result = await pool.query(
-            "DELETE FROM departments WHERE department_id = $1 RETURNING *",
+            "DELETE FROM departments WHERE departmentid = $1 RETURNING *",
             [id]
         );
 

@@ -14,7 +14,7 @@ app.use(express.json({ limit: "10mb" }));
 
 // Base Route
 app.get("/", (req, res) => {
-    res.send("HRMS backend is running!", 200);
+    res.status(200).send("HRMS backend is running!");
 });
 
 app.use("/api", GeneralRoutes);
@@ -22,7 +22,7 @@ app.use("/api/employees", EmployeeRoutes);
 app.use("/api/course", CourseRoutes);
 app.use("/api/department", DeptRoutes);
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}!`);
 });
