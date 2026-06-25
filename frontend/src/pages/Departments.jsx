@@ -3,10 +3,38 @@ import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
 import { API_BASE } from "../api";
 
+function formatDate(value) {
+  if (!value) {
+    return "-";
+  }
+
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? "-" : date.toLocaleDateString();
+}
+
+function formatDateInput(value) {
+  if (!value) {
+    return "";
+  }
+
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? "" : date.toISOString().slice(0, 10);
+}
+
 export default function Departments() {
   const [departments, setDepartments] = useState([]);
   const [selectedDeparment, setSelectedDeparment] = useState(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [page, setPage] = useState(1);
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 10,
+    total: 0,
+    totalPages: 1,
+    hasPrevious: false,
+    hasNext: false,
+  });
+  const limit = 10;
 
   const [form, setForm] = useState({
     departmentid: "",
@@ -20,13 +48,26 @@ export default function Departments() {
   useEffect(() => {
     const fetchDeparments = async () => {
       try {
-        const res = await fetch(`${API_BASE}/department`);
+        const res = await fetch(`${API_BASE}/department?page=${page}&limit=${limit}`);
         if (!res.ok) {
           throw new Error("Failed to fetch deparments");
         }
         const data = await res.json();
-        console.log(data);
-        setDepartments(data);
+        const normalizedDepartments = Array.isArray(data?.data)
+          ? data.data
+          : Array.isArray(data)
+            ? data
+            : [];
+
+        setDepartments(normalizedDepartments);
+        setPagination(data?.pagination || {
+          page,
+          limit,
+          total: normalizedDepartments.length,
+          totalPages: 1,
+          hasPrevious: page > 1,
+          hasNext: false,
+        });
 
       } catch (err) {
         alert(err.message || "An error occurred while fetching the deparments");
@@ -35,7 +76,7 @@ export default function Departments() {
     }
 
     fetchDeparments();
-  }, [])
+  }, [page])
 
   const [editIndex, setEditIndex] = useState(null);
 
@@ -148,7 +189,7 @@ export default function Departments() {
     setForm({
       departmentid: dept.departmentid,
       departmentname: dept.departmentname,
-      establisheddate: dept.establisheddate,
+      establisheddate: formatDateInput(dept.establisheddate),
       departmentemail: dept.departmentemail,
       location: dept.location,
       budget: dept.budget,
@@ -233,7 +274,7 @@ export default function Departments() {
                   <div className="mt-4 space-y-3 text-sm text-gray-700">
                     <div><span className="font-medium text-black">Department ID:</span> {selectedDeparment.departmentid}</div>
                     <div><span className="font-medium text-black">Department Name:</span> {selectedDeparment.departmentname}</div>
-                    <div><span className="font-medium text-black">Established Date:</span> {new Date(selectedDeparment.establisheddate).toLocaleDateString()}</div>
+                    <div><span className="font-medium text-black">Established Date:</span> {formatDate(selectedDeparment.establisheddate)}</div>
                     <div><span className="font-medium text-black">Department Email:</span> {selectedDeparment.departmentemail}</div>
                     <div><span className="font-medium text-black">Location:</span> {selectedDeparment.location}</div>
                     <div><span className="font-medium text-black">Budget:</span> ₹{selectedDeparment.budget}</div>
@@ -357,12 +398,12 @@ export default function Departments() {
                         <td className="border p-2">{dept.departmentid}</td>
                         <td className="border p-2">{dept.departmentname}</td>
                         <td className="border p-2">
-                          {new Date(dept.establisheddate).toLocaleDateString()}
+                          {formatDate(dept.establisheddate)}
                         </td>
                         <td className="border p-2">{dept.departmentemail}</td>
                         <td className="border p-2">{dept.location}</td>
                         <td className="border p-2">₹{dept.budget}</td>
-                        <td className="border p-2">{new Date(dept.createdat).toLocaleDateString()}</td>
+                        <td className="border p-2">{formatDate(dept.createdat)}</td>
                         <td className="border p-2">
                           <div className="flex gap-2">
                             <button
@@ -392,6 +433,30 @@ export default function Departments() {
                   )}
                 </tbody>
               </table>
+            </div>
+
+            <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+              <p className="text-sm text-gray-600">
+                Page {pagination.page} of {pagination.totalPages} ({pagination.total} departments)
+              </p>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  disabled={!pagination.hasPrevious}
+                  onClick={() => setPage((currentPage) => Math.max(currentPage - 1, 1))}
+                  className="border px-4 py-2 rounded bg-gray-100 hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  Previous Page
+                </button>
+                <button
+                  type="button"
+                  disabled={!pagination.hasNext}
+                  onClick={() => setPage((currentPage) => currentPage + 1)}
+                  className="border px-4 py-2 rounded bg-gray-100 hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  Next Page
+                </button>
+              </div>
             </div>
           </div>
         </main>
