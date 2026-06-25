@@ -87,14 +87,29 @@ router.get("/", async (req, res) => {
     let { page = 1, limit = 10 } = req.query;
     page = parseInt(page);
     limit = parseInt(limit);
+    page = Number.isNaN(page) || page < 1 ? 1 : page;
+    limit = Number.isNaN(limit) || limit < 1 ? 10 : limit;
     const offset = (page - 1) * limit;
 
     try {
+        const countResult = await pool.query("SELECT COUNT(*) FROM employees");
+        const total = parseInt(countResult.rows[0].count);
+        const totalPages = Math.max(Math.ceil(total / limit), 1);
         const result = await pool.query(
             "SELECT * FROM employees ORDER BY emp_id LIMIT $1 OFFSET $2",
             [limit, offset]
         );
-        res.status(200).json(result.rows);
+        res.status(200).json({
+            data: result.rows,
+            pagination: {
+                page,
+                limit,
+                total,
+                totalPages,
+                hasPrevious: page > 1,
+                hasNext: page < totalPages
+            }
+        });
     } catch (error) {
         console.error("Error fetching employees:", error);
         res.status(500).json({ message: "Internal server error." });

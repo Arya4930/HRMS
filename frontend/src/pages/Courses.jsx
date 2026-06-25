@@ -7,6 +7,16 @@ export default function Courses() {
   const [courses, setCourses] = useState([]);
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [page, setPage] = useState(1);
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 10,
+    total: 0,
+    totalPages: 1,
+    hasPrevious: false,
+    hasNext: false,
+  });
+  const limit = 10;
 
   const [form, setForm] = useState({
     courseid: "",
@@ -22,12 +32,26 @@ export default function Courses() {
   useEffect(() => {
     const fetchCourses = async () => {
       try {
-        const res = await fetch(`${API_BASE}/course`);
+        const res = await fetch(`${API_BASE}/course?page=${page}&limit=${limit}`);
         if (!res.ok) {
           throw new Error("Failed to fetch courses");
         }
         const data = await res.json();
-        setCourses(data);
+        const normalizedCourses = Array.isArray(data?.data)
+          ? data.data
+          : Array.isArray(data)
+            ? data
+            : [];
+
+        setCourses(normalizedCourses);
+        setPagination(data?.pagination || {
+          page,
+          limit,
+          total: normalizedCourses.length,
+          totalPages: 1,
+          hasPrevious: page > 1,
+          hasNext: false,
+        });
       } catch (error) {
         alert(error.message || "An error occurred while fetching the courses");
         console.error("Error fetching courses:", error);
@@ -35,7 +59,7 @@ export default function Courses() {
     };
 
     fetchCourses();
-  }, []);
+  }, [page]);
 
   const [editIndex, setEditIndex] = useState(null);
 
@@ -417,6 +441,30 @@ export default function Courses() {
                   )}
                 </tbody>
               </table>
+            </div>
+
+            <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+              <p className="text-sm text-gray-600">
+                Page {pagination.page} of {pagination.totalPages} ({pagination.total} courses)
+              </p>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  disabled={!pagination.hasPrevious}
+                  onClick={() => setPage((currentPage) => Math.max(currentPage - 1, 1))}
+                  className="border px-4 py-2 rounded bg-gray-100 hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  Previous Page
+                </button>
+                <button
+                  type="button"
+                  disabled={!pagination.hasNext}
+                  onClick={() => setPage((currentPage) => currentPage + 1)}
+                  className="border px-4 py-2 rounded bg-gray-100 hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  Next Page
+                </button>
+              </div>
             </div>
           </div>
         </main>

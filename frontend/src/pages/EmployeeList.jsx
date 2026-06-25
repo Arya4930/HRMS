@@ -38,28 +38,46 @@ export default function EmployeeList() {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [employees, setEmployees] = useState([]);
+  const [page, setPage] = useState(1);
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 10,
+    total: 0,
+    totalPages: 1,
+    hasPrevious: false,
+    hasNext: false,
+  });
+  const limit = 10;
 
   useEffect(() => {
     const fetchEmployees = async () => {
       try {
-        const response = await fetch(`${API_BASE}/employees`);
+        const response = await fetch(`${API_BASE}/employees?page=${page}&limit=${limit}`);
         if (!response.ok) {
           throw new Error("Failed to fetch employees");
         }
         const data = await response.json();
-        const normalizedEmployees = Array.isArray(data)
-          ? data
+        const normalizedEmployees = Array.isArray(data?.data)
+          ? data.data
+          : Array.isArray(data)
+            ? data
           : Array.isArray(data?.employees)
             ? data.employees
-            : Array.isArray(data?.data)
-              ? data.data
-              : [];
+            : [];
 
         setEmployees(
           normalizedEmployees.length > 0
             ? normalizedEmployees
             : []
         );
+        setPagination(data?.pagination || {
+          page,
+          limit,
+          total: normalizedEmployees.length,
+          totalPages: 1,
+          hasPrevious: page > 1,
+          hasNext: false,
+        });
       } catch (error) {
         console.error("Error fetching employees:", error);
         setEmployees([]);
@@ -67,7 +85,7 @@ export default function EmployeeList() {
     };
 
     fetchEmployees();
-  }, []);
+  }, [page]);
 
   const filteredEmployees = useMemo(() => {
     const term = searchTerm.trim().toLowerCase();
@@ -106,7 +124,7 @@ export default function EmployeeList() {
   };
 
   return (
-    <div className="h-screen overflow-hidden bg-gray-100 text-black flex flex-col">
+    <div className="min-h-screen overflow-hidden bg-gray-100 text-black flex flex-col">
       <Navbar />
 
       <div className="flex flex-1 min-h-0 overflow-hidden">
@@ -144,8 +162,8 @@ export default function EmployeeList() {
               </Link>
             </div>
 
-            <div className="flex-1 min-h-0 overflow-auto">
-              <table className="w-full min-w-[1400px] border">
+            <div className="mt-8 overflow-x-auto">
+              <table className="w-full border">
                 <thead className="bg-gray-100">
                   <tr>
                     <th className="border p-2 text-left">Employee ID</th>
@@ -206,6 +224,30 @@ export default function EmployeeList() {
                   )}
                 </tbody>
               </table>
+            </div>
+
+            <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+              <p className="text-sm text-gray-600">
+                Page {pagination.page} of {pagination.totalPages} ({pagination.total} employees)
+              </p>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  disabled={!pagination.hasPrevious}
+                  onClick={() => setPage((currentPage) => Math.max(currentPage - 1, 1))}
+                  className="border px-4 py-2 rounded bg-gray-100 hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  Previous Page
+                </button>
+                <button
+                  type="button"
+                  disabled={!pagination.hasNext}
+                  onClick={() => setPage((currentPage) => currentPage + 1)}
+                  className="border px-4 py-2 rounded bg-gray-100 hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  Next Page
+                </button>
+              </div>
             </div>
           </div>
         </main>

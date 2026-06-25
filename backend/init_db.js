@@ -1,6 +1,7 @@
 import "dotenv/config";
 import pg from "pg";
 import fs from "fs";
+import { createUser } from "./src/lib/models/user.js";
 
 import { Pool } from "pg";
 
@@ -17,6 +18,12 @@ async function init() {
         console.log("Connecting to the database...");
         const schema = fs.readFileSync("./src/lib/schema.sql", "utf8");
         await pool.query(schema);
+        await createUser({
+            userid: "admin",
+            name: "Admin User",
+            email: "admin@example.com",
+            password: "admin",
+        });
         console.log("✅ Schema executed successfully! All tables have been created.");
     } catch (err) {
         console.error("❌ Error executing schema:", err);
